@@ -1,0 +1,208 @@
+.page {
+  max-width: 700px;
+  width: 100%;
+  margin: 40px auto;
+  padding: 0 var(--space-4) var(--space-12);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* Stepper Component */
+.stepper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  margin-bottom: var(--space-8);
+  padding: 0 10px;
+}
+
+.stepperLine {
+  position: absolute;
+  top: 18px;
+  left: 28px;
+  right: 28px;
+  height: 2px;
+  background-color: var(--border-color);
+  z-index: 1;
+}
+
+.stepperLineActive {
+  position: absolute;
+  top: 18px;
+  left: 28px;
+  height: 2px;
+  background-color: var(--primary-color);
+  z-index: 2;
+  transition: width 0.3s ease;
+}
+
+.stepCircle {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background-color: var(--card-bg);
+  border: 2px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text-muted);
+  position: relative;
+  z-index: 3;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.stepCircleActive {
+  border-color: var(--primary-color);
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.stepCircleCompleted {
+  border-color: var(--primary-color);
+  background-color: var(--card-bg);
+  color: var(--primary-color);
+}
+
+.formCard {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: var(--space-8);
+  box-shadow: var(--shadow-md);
+  margin-bottom: var(--space-6);
+}
+
+.stepTitle {
+  font-size: 20px;
+  font-weight: 650;
+  margin-bottom: 4px;
+  text-align: left;
+}
+
+.stepDesc {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  margin-bottom: var(--space-6);
+  text-align: left;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.fullWidth {
+  grid-column: span 2;
+}
+
+.buttonRow {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+
+.listContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 12px;
+  text-align: left;
+}
+
+.listItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background-color: var(--bg-color);
+}
+
+.listItemInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.listItemTitle {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.listItemSubtitle {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.iconBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  color: var(--text-muted);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconBtn:hover {
+  background-color: var(--border-color);
+  color: var(--text-color);
+}
+
+.tagContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.tagInput {
+  display: flex;
+  gap: 8px;
+}
+
+@media (max-width: 640px) {
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+  .fullWidth {
+    grid-column: span 1;
+  }
+  .stepper {
+    padding: 0;
+  }
+  .stepCircle {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+}
