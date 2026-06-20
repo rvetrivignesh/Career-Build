@@ -1,0 +1,359 @@
+.previewCanvasWrapper {
+  background-color: #525659;
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+  overflow-y: auto;
+  border-radius: 8px;
+  min-height: 600px;
+}
+
+.canvas {
+  background-color: white !important;
+  color: #1e293b !important;
+  width: 100%;
+  max-width: 800px;
+  min-height: 1120px; /* A4 aspect ratio */
+  padding: 40px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  font-family: 'Inter', sans-serif;
+  text-align: left;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+
+/* Contact Details */
+.contactList {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 8px;
+}
+
+.contactItem {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.entry {
+  margin-bottom: 12px;
+}
+
+.entryHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 13px;
+  margin-bottom: 2px;
+}
+
+.entryTitle {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.entrySubtitle {
+  font-size: 12px;
+  color: #475569;
+  font-style: italic;
+  margin-bottom: 2px;
+}
+
+.entryDates {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.entryDesc {
+  font-size: 12px;
+  color: #334155;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.bodyText {
+  font-size: 12px;
+  color: #334155;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.bulletsList {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12px;
+  color: #334155;
+}
+
+.bulletsList li {
+  margin-bottom: 4px;
+}
+
+/* CLASSIC TEMPLATE */
+.classic {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.classic .header {
+  text-align: center;
+  border-bottom: 2px solid #0f172a;
+  padding-bottom: 12px;
+}
+
+.classic .name {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+  letter-spacing: -0.5px;
+}
+
+.classic .roleTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2563eb;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0;
+}
+
+.classic .sectionTitle {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #0f172a;
+  border-bottom: 1px solid #cbd5e1;
+  padding-bottom: 4px;
+  margin: 0 0 10px 0;
+  letter-spacing: 0.5px;
+}
+
+.classic .skillsListClassic {
+  font-size: 12px;
+  color: #334155;
+  line-height: 1.6;
+}
+
+/* MODERN TEMPLATE */
+.modern {
+  display: grid;
+  grid-template-columns: 32% 68%;
+  padding: 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modernLeftColumn {
+  background-color: #f8fafc;
+  border-right: 1px solid #e2e8f0;
+  padding: 40px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.modernRightColumn {
+  padding: 40px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.modern .name {
+  font-size: 22px;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+  line-height: 1.2;
+}
+
+.modern .roleTitle {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2563eb;
+  margin: 0;
+}
+
+.modernSidebarTitle {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #475569;
+  letter-spacing: 0.8px;
+  margin: 0 0 8px 0;
+  border-bottom: 1.5px solid #cbd5e1;
+  padding-bottom: 4px;
+}
+
+.modernSidebarContact {
+  font-size: 10.5px;
+  color: #475569;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  word-break: break-all;
+}
+
+.skillsContainerModern {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.skillBadge {
+  background-color: #e2e8f0;
+  color: #334155;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.modern .sectionTitle {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #0f172a;
+  margin: 0 0 8px 0;
+  border-bottom: 1.5px solid #0f172a;
+  padding-bottom: 3px;
+}
+
+/* MINIMAL TEMPLATE */
+.minimal {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.minimalHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.minimalHeader .name {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+}
+
+.minimalSubtitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: #475569;
+  margin-bottom: 8px;
+}
+
+.minimal .contactList {
+  justify-content: flex-start;
+  gap: 16px;
+  color: #475569;
+}
+
+.minimalDivider {
+  border: 0;
+  border-top: 1px solid #e2e8f0;
+  margin: 4px 0;
+}
+
+.minimalRow {
+  display: grid;
+  grid-template-columns: 20% 80%;
+  gap: 16px;
+  font-size: 12px;
+}
+
+.minimalLabelCol {
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: #64748b;
+  letter-spacing: 0.5px;
+  padding-top: 2px;
+}
+
+.minimalValueCol {
+  color: #1e293b;
+}
+
+.minimalSkillsRow {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #334155;
+}
+
+/* MEDIA PRINT CSS FOR PDF DOWNLOAD */
+@media print {
+  /* Hide dashboard navigation, header, actions */
+  body {
+    background: white !important;
+    color: black !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  :global(#root) > div > header,
+  :global(#root) > div > div > aside,
+  :global(#root) > div > div > div > footer,
+  :global(.no-print) {
+    display: none !important;
+  }
+
+  /* Reset layout structure for absolute prints */
+  :global(#root) > div {
+    display: block !important;
+    height: auto !important;
+    min-height: 0 !important;
+  }
+
+  :global(#root) > div > div {
+    display: block !important;
+    height: auto !important;
+  }
+
+  :global(#root) > div > div > div {
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: transparent !important;
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  .previewCanvasWrapper {
+    background: white !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block !important;
+    overflow: visible !important;
+    min-height: 0 !important;
+  }
+
+  .canvas {
+    box-shadow: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 0 !important;
+    display: block !important;
+    page-break-after: avoid;
+  }
+  
+  /* Ensure page-break controls on multi-page resumes */
+  .section {
+    page-break-inside: avoid;
+  }
+  .entry {
+    page-break-inside: avoid;
+  }
+}

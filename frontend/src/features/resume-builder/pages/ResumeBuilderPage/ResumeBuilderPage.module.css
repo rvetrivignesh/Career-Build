@@ -1,0 +1,131 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 16px;
+}
+
+.headerInfo {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  text-align: left;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.backBtn:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-color);
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 4px 0 0 0;
+}
+
+.editorWorkspace {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+}
+
+.mobileTabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 16px;
+}
+
+.tabBtn {
+  flex: 1;
+  padding: 12px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.tabBtnActive {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+}
+
+.splitLayout {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: 100%;
+}
+
+.formColumn,
+.previewColumn {
+  width: 100%;
+}
+
+/* Responsive configurations */
+@media (max-width: 1023px) {
+  .mobileHidden {
+    display: none !important;
+  }
+  
+  .mobileVisible {
+    display: block !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .mobileTabs {
+    display: none !important;
+  }
+  
+  .splitLayout {
+    display: grid;
+    grid-template-columns: 4.5fr 7.5fr;
+    gap: 24px;
+    align-items: flex-start;
+  }
+  
+  .formColumn {
+    display: block !important;
+    position: sticky;
+    top: 24px;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+  }
+  
+  .previewColumn {
+    display: block !important;
+  }
+}
