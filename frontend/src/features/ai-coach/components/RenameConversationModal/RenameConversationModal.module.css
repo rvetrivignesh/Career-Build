@@ -1,0 +1,11 @@
+.footerActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  width: 100%;
+}
+
+.form {
+  width: 100%;
+  text-align: left;
+}
