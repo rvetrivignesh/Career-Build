@@ -1,14 +1,110 @@
-/**
- * Gemini API Integration Service
- */
+// Using global fetch (supported natively in Node.js 18+)
 
-export const generateResumeFromProfile = async (profile) => {
+// Helper to make API call to Gemini
+const callGemini = async (prompt) => {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     throw new Error("GEMINI_API_KEY is not defined in environment variables");
   }
 
-  // Construct prompt containing user profile data and formatting instructions
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              {
+                text: prompt,
+              },
+            ],
+          },
+        ],
+        generationConfig: {
+          responseMimeType: "application/json",
+        },
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+  }
+
+  const result = await response.json();
+  if (
+    !result.candidates ||
+    result.candidates.length === 0 ||
+    !result.candidates[0].content ||
+    !result.candidates[0].content.parts ||
+    result.candidates[0].content.parts.length === 0
+  ) {
+    throw new Error("Invalid or empty response from Gemini API");
+  }
+
+  let jsonText = result.candidates[0].content.parts[0].text.trim();
+
+  if (jsonText.startsWith("```")) {
+    jsonText = jsonText.replace(/^```json\s*/i, "").replace(/```$/, "").trim();
+  }
+
+  return JSON.parse(jsonText);
+};
+
+export const generateJobRoleIntelligence = async (targetRole) => {
+  const prompt = `
+You are an expert career consultant.
+Analyze the target job role: "${targetRole}"
+Generate professional career intelligence for this role in strict JSON format.
+
+Expected Output Schema:
+{
+  "targetRole": "${targetRole}",
+  "coreSkills": ["At least 5 core skills required for this role"],
+  "secondarySkills": ["At least 5 secondary/soft skills for this role"],
+  "technicalKeywords": ["At least 5 technical keywords/concepts relevant to the role"],
+  "tools": ["At least 5 popular software tools, libraries, or IDEs used in this role"],
+  "industryKeywords": ["At least 5 industry-specific buzzwords or concepts"],
+  "atsKeywords": ["At least 5 keywords frequently found in job descriptions for this role to optimize ATS scoring"],
+  "professionalSummary": "A concise, general professional summary (2-3 sentences) for a professional seeking a ${targetRole} role.",
+  "careerObjective": "A general career objective for a professional seeking a ${targetRole} role."
+}
+
+Do not include markdown blocks, backticks, or other conversational text. Return ONLY the JSON object.
+`;
+  return await callGemini(prompt);
+};
+
+export const generateSummaryAndObjective = async (profile, roleIntelligence) => {
+  const prompt = `
+You are an expert AI Resume Writer.
+Based on the user's raw profile data and the target job role intelligence, generate a highly personalized Professional Summary and Career Objective.
+
+User Profile:
+${JSON.stringify(profile, null, 2)}
+
+Role Intelligence:
+${JSON.stringify(roleIntelligence, null, 2)}
+
+Generate a customized summary and objective tailored to the target role "${roleIntelligence.targetRole}" and the user's specific experience/skills.
+
+Expected Output Schema:
+{
+  "summary": "A highly customized professional summary (2-3 sentences) highlighting their matching skills, projects, and experiences.",
+  "objective": "A customized career objective focused on their target role and how they can add value."
+}
+
+Do not include markdown blocks, backticks, or other conversational text. Return ONLY the JSON object.
+`;
+  return await callGemini(prompt);
+};
+
+export const generateResumeFromProfile = async (profile) => {
   const prompt = `
 You are an expert AI Resume Writer specialized in creating ATS-friendly, professional resumes.
 Your task is to take the following raw user profile data and generate a highly polished, professional resume in strict JSON format.
@@ -44,10 +140,10 @@ Expected Output JSON Schema:
       "location": "Location of work",
       "duration": "Duration in months or years, e.g. '3 months', '1 year'",
       "startMonth": "Month started",
-      "startYear": Start year as number,
+      "startYear": 2024,
       "endMonth": "Month ended or empty if current",
-      "endYear": End year as number or empty if current,
-      "currentlyWorking": Boolean,
+      "endYear": 2025,
+      "currentlyWorking": true,
       "highlights": ["Bullet points of result-oriented accomplishments and responsibilities (concise, no long paragraphs)"]
     }
   ],
@@ -65,13 +161,13 @@ Expected Output JSON Schema:
       "institute": "School or University Name",
       "degree": "Degree and Major",
       "location": "Location",
-      "duration": Duration as number,
-      "cgpa": CGPA as number or empty,
+      "duration": 4,
+      "cgpa": 9.5,
       "startMonth": "Month started",
-      "startYear": Start year as number,
+      "startYear": 2022,
       "endMonth": "Month ended",
-      "endYear": End year as number,
-      "currentlyStudying": Boolean
+      "endYear": 2026,
+      "currentlyStudying": false
     }
   ],
   "certifications": [
@@ -85,59 +181,56 @@ Expected Output JSON Schema:
   "achievements": ["Bullet points of key academic, professional, or skill milestones"]
 }
 `;
-
-  try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: prompt,
-                },
-              ],
-            },
-          ],
-          generationConfig: {
-            responseMimeType: "application/json",
-          },
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
-    }
-
-    const result = await response.json();
-    if (
-      !result.candidates ||
-      result.candidates.length === 0 ||
-      !result.candidates[0].content ||
-      !result.candidates[0].content.parts ||
-      result.candidates[0].content.parts.length === 0
-    ) {
-      throw new Error("Invalid or empty response from Gemini API");
-    }
-
-    let jsonText = result.candidates[0].content.parts[0].text.trim();
-
-    // Strip markdown formatting block if Gemini returned it despite constraints
-    if (jsonText.startsWith("```")) {
-      jsonText = jsonText.replace(/^```json\s*/i, "").replace(/```$/, "").trim();
-    }
-
-    const parsedData = JSON.parse(jsonText);
-    return parsedData;
-  } catch (error) {
-    console.error("Gemini service error:", error);
-    throw new Error(`Failed to generate resume content via Gemini: ${error.message}`);
-  }
+  return await callGemini(prompt);
 };
+
+export const fallbackExtractResume = async (rawText) => {
+  const prompt = `
+You are an expert AI Resume Parser.
+Extract the structured information from the raw resume text provided below.
+Provide a clean, consolidated, and structured extraction in strict JSON format.
+
+Raw Resume Text:
+"""
+${rawText}
+"""
+
+Expected Output Schema:
+{
+  "skills": ["List of skills found"],
+  "projects": [
+    {
+      "title": "Project Title",
+      "description": "Short project description or bullet details",
+      "technologies": ["List of technologies used"]
+    }
+  ],
+  "education": [
+    {
+      "institute": "School or University Name",
+      "degree": "Degree and Major",
+      "location": "Location or empty string",
+      "duration": "Duration description or years"
+    }
+  ],
+  "experience": [
+    {
+      "company": "Company Name",
+      "role": "Role Title",
+      "description": "Responsibility descriptions or bullet points",
+      "duration": "Duration in months or years"
+    }
+  ],
+  "certifications": [
+    {
+      "title": "Certification Title",
+      "issuer": "Issuing Organization or empty"
+    }
+  ]
+}
+
+Ensure to return only valid JSON without markdown wrapping. Do not generate any scores.
+`;
+  return await callGemini(prompt);
+};
+

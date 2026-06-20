@@ -5,6 +5,9 @@ import dotenv from "dotenv";
 import authRoutes from "./routes/auth.js";
 import profileRoutes from "./routes/profile.js";
 import resumeRoutes from "./routes/resumeRoutes.js";
+import resumeAnalysisRoutes from "./routes/resumeAnalysisRoutes.js";
+import assessmentRoutes from "./routes/assessmentRoutes.js";
+import chatRoutes from "./routes/chatRoutes.js";
 import errorHandler from "./middleware/errorHandler.js";
 
 dotenv.config();
@@ -19,6 +22,9 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/profile", profileRoutes);
 app.use("/api/resume", resumeRoutes);
+app.use("/api/analyzer", resumeAnalysisRoutes);
+app.use("/api/assessment", assessmentRoutes);
+app.use("/api/chat", chatRoutes);
 
 
 // Centralized error handling middleware (must be registered last)
