@@ -1,0 +1,254 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 16px;
+  text-align: left;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-color);
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 4px 0 0 0;
+}
+
+.historyToggleBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.historyToggleBtn:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-color: var(--primary-color);
+}
+
+.workspace {
+  display: flex;
+  position: relative;
+  flex: 1;
+  gap: 24px;
+  height: 100%;
+}
+
+.mainContent {
+  flex: 1;
+  width: 100%;
+  min-height: 400px;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  right: -300px;
+  width: 300px;
+  height: 100%;
+  background-color: var(--bg-color);
+  border-left: 1px solid var(--border-color);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  transition: right 0.3s ease-in-out;
+  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.2);
+}
+
+.sidebarOpen {
+  right: 0;
+}
+
+.sidebarHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color);
+  font-weight: 700;
+  color: var(--text-color);
+}
+
+.closeSidebarBtn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+}
+
+.sidebarContent {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+@media (min-width: 1024px) {
+  .sidebar {
+    position: static;
+    width: 260px;
+    height: auto;
+    border-left: none;
+    border-right: 1px solid var(--border-color);
+    box-shadow: none;
+    display: none; /* Only show when toggled, but as a grid panel */
+  }
+
+  .sidebarOpen {
+    display: flex;
+  }
+}
+
+/* Loading Steps Tracker styles */
+.loadingContainer {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 40px;
+  max-width: 500px;
+  margin: 40px auto;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.loadingTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-color);
+  margin-bottom: 24px;
+}
+
+.stepsTracker {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  text-align: left;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.stepItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  opacity: 0.4;
+  transition: opacity 0.3s;
+}
+
+.stepActive {
+  opacity: 1;
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.stepCompleted {
+  opacity: 0.8;
+  color: #22c55e;
+}
+
+.stepIndicator {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+
+.stepText {
+  font-size: 14px;
+}
+
+/* Fallback Warning UI styles */
+.fallbackContainer {
+  background-color: var(--card-bg);
+  border: 1px solid var(--error-color);
+  border-radius: 12px;
+  padding: 32px;
+  max-width: 600px;
+  margin: 30px auto;
+  text-align: left;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.fallbackWarning {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fallbackTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--error-color);
+  margin: 0;
+}
+
+.fallbackText {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-color);
+}
+
+.diagnosticsBox {
+  background-color: rgba(239, 68, 68, 0.05);
+  border: 1px dashed var(--error-color);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.diagnosticsBox strong {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 8px;
+  color: var(--text-color);
+}
+
+.diagnosticsBox ul {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 13px;
+  color: var(--text-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fallbackActionText {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+.fallbackActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
