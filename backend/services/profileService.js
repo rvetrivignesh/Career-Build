@@ -53,7 +53,7 @@ const compareDates = (a, b, isExp = false) => {
 
 // Get profile by user ID
 export const getProfileByUserId = async (userId) => {
-  const profile = await UserProfile.findOne({ user: userId }).lean();
+  const profile = await UserProfile.findOne({ user: userId }).populate("user", "username email").lean();
   if (!profile) return null;
 
   // Sort education and experience on the lean object
@@ -103,6 +103,14 @@ export const updateProfile = async (userId, data) => {
   profile.experience = data.experience || [];
   profile.targetRoles = data.targetRoles;
   profile.careerObjective = data.careerObjective;
+  profile.github = data.github || "";
+  profile.linkedin = data.linkedin || "";
+  profile.portfolio = data.portfolio || "";
+  profile.currentStatus = data.currentStatus;
+  profile.currentRole = data.currentRole || "";
+  profile.achievements = data.achievements || [];
+  profile.languages = data.languages || [];
+  profile.interests = data.interests || [];
   profile.profileCompleted = true;
 
   await profile.save();

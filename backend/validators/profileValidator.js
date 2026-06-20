@@ -53,6 +53,63 @@ export const validateProfile = (req, res, next) => {
   validateString("location", "Location", true);
   validateString("careerObjective", "Career objective", true);
 
+  // Validate professional URLs (optional)
+  const validateUrl = (field, name) => {
+    if (body[field] !== undefined && body[field] !== null && body[field] !== "") {
+      if (typeof body[field] !== "string") {
+        errors.push(`${name} must be a string`);
+        return;
+      }
+      body[field] = body[field].trim();
+      if (body[field].length > 0) {
+        try {
+          new URL(body[field]);
+        } catch (e) {
+          errors.push(`${name} is not a valid URL`);
+        }
+      }
+    }
+  };
+
+  validateUrl("github", "GitHub profile link");
+  validateUrl("linkedin", "LinkedIn profile link");
+  validateUrl("portfolio", "Portfolio link");
+
+  // Validate current status (required)
+  if (body.currentStatus === undefined || body.currentStatus === null) {
+    errors.push("Current status is required");
+  } else {
+    validateString("currentStatus", "Current status", true);
+    const validStatuses = ["Student", "Fresher", "Working Professional", "Career Switcher"];
+    if (body.currentStatus && !validStatuses.includes(body.currentStatus)) {
+      errors.push(`Current status must be one of: ${validStatuses.join(", ")}`);
+    }
+  }
+
+  // Validate current role (optional)
+  validateString("currentRole", "Current role", false);
+
+  // Validate optional array fields
+  const validateStringArray = (field, name) => {
+    if (body[field] !== undefined && body[field] !== null) {
+      if (!Array.isArray(body[field])) {
+        errors.push(`${name} must be an array`);
+      } else {
+        body[field] = body[field].map((val, idx) => {
+          if (typeof val !== "string") {
+            errors.push(`${name} at index ${idx} must be a string`);
+            return "";
+          }
+          return val.trim();
+        }).filter(val => val.length > 0);
+      }
+    }
+  };
+
+  validateStringArray("achievements", "Achievements");
+  validateStringArray("languages", "Languages");
+  validateStringArray("interests", "Interests");
+
   // 2. Education Validation
   if (body.education === undefined || body.education === null) {
     errors.push("Education is required");
@@ -75,6 +132,11 @@ export const validateProfile = (req, res, next) => {
         errors.push(`Education entry at index ${idx}: Degree is required`);
       } else {
         edu.degree = edu.degree.trim();
+      }
+      if (!edu.branch || typeof edu.branch !== "string" || edu.branch.trim().length === 0) {
+        errors.push(`Education entry at index ${idx}: Branch / Specialization is required`);
+      } else {
+        edu.branch = edu.branch.trim();
       }
       if (edu.cgpa !== undefined && edu.cgpa !== null) {
         const cgpa = Number(edu.cgpa);
@@ -201,13 +263,20 @@ export const validateProfile = (req, res, next) => {
         } else {
           exp.role = exp.role.trim();
         }
+        if (exp.description !== undefined && exp.description !== null) {
+          if (typeof exp.description !== "string") {
+            errors.push(`Experience entry at index ${idx}: Description must be a string`);
+          } else {
+            exp.description = exp.description.trim();
+          }
+        }
         if (exp.employmentType && !allowedEmploymentTypes.includes(exp.employmentType)) {
           errors.push(`Experience entry at index ${idx}: Employment type must be one of: ${allowedEmploymentTypes.join(", ")}`);
         }
         if (exp.duration !== undefined && exp.duration !== null) {
           const dur = Number(exp.duration);
-          if (isNaN(dur) || dur < 1 || dur > 100) {
-            errors.push(`Experience entry at index ${idx}: Duration must be a number between 1 and 100`);
+          if (isNaN(dur) || dur < 1 || dur > 600) {
+            errors.push(`Experience entry at index ${idx}: Duration must be a number between 1 and 600`);
           } else {
             exp.duration = dur;
           }

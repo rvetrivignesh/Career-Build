@@ -19,6 +19,12 @@ const educationSchema = new mongoose.Schema(
             trim: true,
         },
 
+        branch: {
+            type: String,
+            required: true,
+            trim: true,
+        },
+
         duration: {
             type: Number,
             min: 1,
@@ -132,6 +138,11 @@ const experienceSchema = new mongoose.Schema(
             trim: true,
         },
 
+        description: {
+            type: String,
+            trim: true,
+        },
+
         employmentType: {
             type: String,
             enum: [
@@ -151,10 +162,15 @@ const experienceSchema = new mongoose.Schema(
         duration: {
             type: Number,
             min: 1,
-            max: 100
+            max: 600
         },
 
         currentlyWorking: {
+            type: Boolean,
+            default: false,
+        },
+
+        isCurrentRole: {
             type: Boolean,
             default: false,
         },
@@ -245,6 +261,47 @@ const userProfileSchema = new mongoose.Schema(
             trim: true,
         }],
 
+        github: {
+            type: String,
+            trim: true,
+        },
+
+        linkedin: {
+            type: String,
+            trim: true,
+        },
+
+        portfolio: {
+            type: String,
+            trim: true,
+        },
+
+        currentStatus: {
+            type: String,
+            required: true,
+            enum: ["Student", "Fresher", "Working Professional", "Career Switcher"],
+        },
+
+        currentRole: {
+            type: String,
+            trim: true,
+        },
+
+        achievements: [{
+            type: String,
+            trim: true,
+        }],
+
+        languages: [{
+            type: String,
+            trim: true,
+        }],
+
+        interests: [{
+            type: String,
+            trim: true,
+        }],
+
         careerObjective: {
             type: String,
             required: true,
@@ -264,4 +321,5 @@ const userProfileSchema = new mongoose.Schema(
 
 const UserProfile = mongoose.model("UserProfile", userProfileSchema);
 
+export { educationSchema, projectSchema, certificationSchema, experienceSchema };
 export default UserProfile;
