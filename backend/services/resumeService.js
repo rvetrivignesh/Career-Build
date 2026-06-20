@@ -1,7 +1,7 @@
 import Resume from "../models/Resume.js";
 import UserProfile from "../models/UserProfile.js";
+import JobRoleProfile from "../models/JobRoleProfile.js";
 import * as geminiService from "./geminiService.js";
-import { validateResumeJSON } from "../validators/resumeValidation.js";
 
 // Helper to check profile completion status
 const checkProfileStatus = async (userId) => {
@@ -19,39 +19,104 @@ const checkProfileStatus = async (userId) => {
   return profile;
 };
 
-// Generate a resume (with cost optimization check)
-export const generateResume = async (userId, templateType) => {
-  const profile = await checkProfileStatus(userId);
-
-  // Fetch the latest generated resume
-  const latestResume = await Resume.findOne({ user: userId }).sort({ createdAt: -1 });
-
-  if (latestResume) {
-    const profileUpdatedTime = new Date(profile.updatedAt).getTime();
-    const resumeCreatedTime = new Date(latestResume.createdAt).getTime();
-
-    // Database Optimization: If profile hasn't changed since last generation, return existing
-    if (profileUpdatedTime <= resumeCreatedTime) {
-      if (latestResume.templateType !== templateType) {
-        latestResume.templateType = templateType;
-        await latestResume.save();
-      }
-      return latestResume;
-    }
+// Expose role intelligence generation & caching
+export const getOrCreateRoleIntelligence = async (targetRole) => {
+  if (!targetRole) {
+    throw new Error("targetRole is required");
   }
 
-  // Profile has updated or no resume exists: call Gemini
-  const resumeJSON = await geminiService.generateResumeFromProfile(profile);
+  const role = targetRole.trim();
+  let roleProfile = await JobRoleProfile.findOne({
+    targetRole: { $regex: new RegExp(`^${role}$`, "i") },
+  });
 
-  // Validate the output schema
-  validateResumeJSON(resumeJSON);
+  if (!roleProfile) {
+    // Call Gemini
+    const intelligence = await geminiService.generateJobRoleIntelligence(role);
+    roleProfile = new JobRoleProfile({
+      targetRole: role,
+      coreSkills: intelligence.coreSkills || [],
+      secondarySkills: intelligence.secondarySkills || [],
+      technicalKeywords: intelligence.technicalKeywords || [],
+      tools: intelligence.tools || [],
+      industryKeywords: intelligence.industryKeywords || [],
+      atsKeywords: intelligence.atsKeywords || [],
+      professionalSummary: intelligence.professionalSummary || "",
+      careerObjective: intelligence.careerObjective || "",
+      generatedAt: new Date(),
+    });
+    await roleProfile.save();
+  }
 
-  // Save the new resume document
+  return roleProfile;
+};
+
+// Generate a resume
+export const generateResume = async (userId, targetRole, templateId) => {
+  const profile = await checkProfileStatus(userId);
+
+  // 1. Get or create role intelligence
+  const roleProfile = await getOrCreateRoleIntelligence(targetRole);
+
+  // 2. Generate customized summary and objective via Gemini
+  const customSummaryAndObjective = await geminiService.generateSummaryAndObjective(
+    profile,
+    roleProfile
+  );
+
+  // 3. Merge user skills and relevant role skills
+  const userSkills = profile.skills || [];
+  const roleSkills = roleProfile.coreSkills || [];
+  // Deduplicate case-insensitively
+  const mergedSkillsSet = new Set();
+  const lowercaseSkillsSet = new Set();
+
+  userSkills.forEach((s) => {
+    const clean = s.trim();
+    if (clean && !lowercaseSkillsSet.has(clean.toLowerCase())) {
+      mergedSkillsSet.add(clean);
+      lowercaseSkillsSet.add(clean.toLowerCase());
+    }
+  });
+
+  roleSkills.forEach((s) => {
+    const clean = s.trim();
+    if (clean && !lowercaseSkillsSet.has(clean.toLowerCase())) {
+      mergedSkillsSet.add(clean);
+      lowercaseSkillsSet.add(clean.toLowerCase());
+    }
+  });
+
+  const mergedSkills = Array.from(mergedSkillsSet);
+
+  // 4. Save the new resume document
   const resume = new Resume({
     user: userId,
-    templateType,
-    resumeData: resumeJSON,
-    generationVersion: 1, // Reset version on profile change / first generation
+    targetRole,
+    templateId,
+    summary: customSummaryAndObjective.summary || roleProfile.professionalSummary,
+    objective: customSummaryAndObjective.objective || roleProfile.careerObjective,
+    skills: mergedSkills,
+    education: profile.education || [],
+    experience: profile.experience || [],
+    projects: profile.projects || [],
+    certifications: profile.certifications || [],
+    achievements: profile.achievements || [],
+    languages: profile.languages || [],
+    interests: profile.interests || [],
+    customSection: { heading: "", content: "" },
+    jobRoleProfile: roleProfile._id,
+    visibilitySettings: {
+      showEducation: true,
+      showExperience: true,
+      showProjects: true,
+      showCertifications: true,
+      showAchievements: true,
+      showLanguages: true,
+      showInterests: true,
+      showCustomSection: true,
+    },
+    generatedAt: new Date(),
   });
 
   await resume.save();
@@ -60,32 +125,36 @@ export const generateResume = async (userId, templateType) => {
 
 // Retrieve the latest generated resume
 export const getLatestResume = async (userId) => {
-  const latestResume = await Resume.findOne({ user: userId }).sort({ createdAt: -1 });
+  const latestResume = await Resume.findOne({ user: userId })
+    .populate("jobRoleProfile")
+    .sort({ createdAt: -1 });
   return latestResume;
 };
 
-// Force regenerate a new resume version (e.g. after profile updates)
-export const regenerateResume = async (userId, templateType) => {
-  const profile = await checkProfileStatus(userId);
+// Save edits to a resume
+export const saveResume = async (userId, resumeId, updateData) => {
+  const resume = await Resume.findOne({ _id: resumeId, user: userId });
+  if (!resume) {
+    const error = new Error("Resume not found");
+    error.statusCode = 404;
+    throw error;
+  }
 
-  // Fetch latest resume to determine the next version number
-  const latestResume = await Resume.findOne({ user: userId }).sort({ createdAt: -1 });
-  const nextVersion = latestResume ? latestResume.generationVersion + 1 : 1;
-
-  // Call Gemini to get fresh resume content
-  const resumeJSON = await geminiService.generateResumeFromProfile(profile);
-
-  // Validate output schema
-  validateResumeJSON(resumeJSON);
-
-  // Save the new version resume document
-  const resume = new Resume({
-    user: userId,
-    templateType,
-    resumeData: resumeJSON,
-    generationVersion: nextVersion,
-  });
+  // Update allowed fields
+  if (updateData.summary !== undefined) resume.summary = updateData.summary;
+  if (updateData.objective !== undefined) resume.objective = updateData.objective;
+  if (updateData.skills !== undefined) resume.skills = updateData.skills;
+  if (updateData.education !== undefined) resume.education = updateData.education;
+  if (updateData.experience !== undefined) resume.experience = updateData.experience;
+  if (updateData.projects !== undefined) resume.projects = updateData.projects;
+  if (updateData.certifications !== undefined) resume.certifications = updateData.certifications;
+  if (updateData.achievements !== undefined) resume.achievements = updateData.achievements;
+  if (updateData.languages !== undefined) resume.languages = updateData.languages;
+  if (updateData.interests !== undefined) resume.interests = updateData.interests;
+  if (updateData.customSection !== undefined) resume.customSection = updateData.customSection;
+  if (updateData.visibilitySettings !== undefined) resume.visibilitySettings = updateData.visibilitySettings;
+  if (updateData.templateId !== undefined) resume.templateId = updateData.templateId;
 
   await resume.save();
-  return resume;
+  return getLatestResume(userId);
 };

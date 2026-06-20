@@ -1,21 +1,25 @@
 import express from "express";
 import protect from "../middleware/auth.js";
 import checkProfileCompletion from "../middleware/checkProfileCompletion.js";
-import { validateResumeRequest } from "../validators/resumeValidation.js";
 import {
+  validateRoleIntelligenceRequest,
+  validateResumeRequest,
+} from "../validators/resumeValidation.js";
+import {
+  generateRoleIntelligence,
   generateResume,
   getLatestResume,
-  regenerateResume,
+  saveResume,
 } from "../controllers/resumeController.js";
 
 const router = express.Router();
 
-// Enforce authentication and profile completion check on all resume endpoints
 router.use(protect);
 router.use(checkProfileCompletion);
 
+router.post("/role-intelligence", validateRoleIntelligenceRequest, generateRoleIntelligence);
 router.post("/generate", validateResumeRequest, generateResume);
 router.get("/latest", getLatestResume);
-router.post("/regenerate", validateResumeRequest, regenerateResume);
+router.put("/save", saveResume);
 
 export default router;

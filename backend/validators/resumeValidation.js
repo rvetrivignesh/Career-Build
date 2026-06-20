@@ -1,75 +1,37 @@
-export const validateResumeRequest = (req, res, next) => {
-  const { templateType } = req.body;
-  const validTemplates = ["professional", "modern", "minimal", "graduate"];
-
-  if (!templateType) {
+export const validateRoleIntelligenceRequest = (req, res, next) => {
+  const { targetRole } = req.body;
+  if (!targetRole || typeof targetRole !== "string" || targetRole.trim().length === 0) {
     return res.status(400).json({
       success: false,
       message: "Validation failed",
-      errors: ["templateType is required"],
+      errors: ["targetRole is required and must be a non-empty string"],
     });
   }
-
-  if (!validTemplates.includes(templateType)) {
-    return res.status(400).json({
-      success: false,
-      message: "Validation failed",
-      errors: [`templateType must be one of: ${validTemplates.join(", ")}`],
-    });
-  }
-
+  req.body.targetRole = targetRole.trim();
   next();
 };
 
-export const validateResumeJSON = (resumeData) => {
-  if (!resumeData || typeof resumeData !== "object") {
-    throw new Error("Resume data must be a valid JSON object");
+export const validateResumeRequest = (req, res, next) => {
+  const { targetRole, templateId } = req.body;
+  const errors = [];
+
+  if (!targetRole || typeof targetRole !== "string" || targetRole.trim().length === 0) {
+    errors.push("targetRole is required");
   }
 
-  const requiredSections = [
-    "header",
-    "professionalSummary",
-    "skills",
-    "experience",
-    "projects",
-    "education",
-  ];
-
-  const missing = [];
-  requiredSections.forEach((section) => {
-    if (resumeData[section] === undefined || resumeData[section] === null) {
-      missing.push(section);
-    }
-  });
-
-  if (missing.length > 0) {
-    throw new Error(`Generated resume is missing mandatory sections: ${missing.join(", ")}`);
+  if (!templateId || typeof templateId !== "string" || templateId.trim().length === 0) {
+    errors.push("templateId is required");
   }
 
-  // Basic structure validations
-  if (typeof resumeData.header !== "object" || resumeData.header === null) {
-    throw new Error("Resume header must be an object");
+  if (errors.length > 0) {
+    return res.status(400).json({
+      success: false,
+      message: "Validation failed",
+      errors,
+    });
   }
 
-  if (typeof resumeData.professionalSummary !== "string" || resumeData.professionalSummary.trim().length === 0) {
-    throw new Error("Resume professionalSummary must be a non-empty string");
-  }
-
-  if (!Array.isArray(resumeData.skills) || resumeData.skills.length === 0) {
-    throw new Error("Resume skills must be a non-empty array");
-  }
-
-  if (!Array.isArray(resumeData.experience)) {
-    throw new Error("Resume experience must be an array");
-  }
-
-  if (!Array.isArray(resumeData.projects)) {
-    throw new Error("Resume projects must be an array");
-  }
-
-  if (!Array.isArray(resumeData.education) || resumeData.education.length === 0) {
-    throw new Error("Resume education must be a non-empty array");
-  }
-
-  return true;
+  req.body.targetRole = targetRole.trim();
+  req.body.templateId = templateId.trim();
+  next();
 };

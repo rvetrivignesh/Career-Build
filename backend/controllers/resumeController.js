@@ -1,13 +1,29 @@
 import * as resumeService from "../services/resumeService.js";
 
+// POST /role-intelligence
+export const generateRoleIntelligence = async (req, res, next) => {
+  try {
+    const { targetRole } = req.body;
+    const roleProfile = await resumeService.getOrCreateRoleIntelligence(targetRole);
+    res.status(200).json({
+      success: true,
+      message: "Role intelligence retrieved successfully",
+      data: roleProfile,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // POST /generate
 export const generateResume = async (req, res, next) => {
   try {
-    const { templateType } = req.body;
-    const resume = await resumeService.generateResume(req.user._id, templateType);
+    const { targetRole, templateId } = req.body;
+    const resume = await resumeService.generateResume(req.user._id, targetRole, templateId);
     res.status(201).json({
       success: true,
-      resume,
+      message: "Resume generated successfully",
+      data: resume,
     });
   } catch (error) {
     next(error);
@@ -22,25 +38,34 @@ export const getLatestResume = async (req, res, next) => {
       return res.status(404).json({
         success: false,
         message: "No resume found",
+        errors: ["No resume has been generated for this user yet"],
       });
     }
     res.status(200).json({
       success: true,
-      resume,
+      message: "Latest resume retrieved successfully",
+      data: resume,
     });
   } catch (error) {
     next(error);
   }
 };
 
-// POST /regenerate
-export const regenerateResume = async (req, res, next) => {
+// PUT /save
+export const saveResume = async (req, res, next) => {
   try {
-    const { templateType } = req.body;
-    const resume = await resumeService.regenerateResume(req.user._id, templateType);
+    const { resumeId, updateData } = req.body;
+    if (!resumeId) {
+      return res.status(400).json({
+        success: false,
+        message: "resumeId is required",
+      });
+    }
+    const resume = await resumeService.saveResume(req.user._id, resumeId, updateData);
     res.status(200).json({
       success: true,
-      resume,
+      message: "Resume saved successfully",
+      data: resume,
     });
   } catch (error) {
     next(error);
