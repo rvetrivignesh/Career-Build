@@ -1,0 +1,204 @@
+.card {
+  background: var(--card-bg, #ffffff);
+  border: 1px solid var(--border-color, #e2e8f0);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.cardCompleted {
+  border-color: rgba(56, 161, 105, 0.4);
+  background: linear-gradient(180deg, var(--card-bg, #ffffff) 0%, rgba(56, 161, 105, 0.02) 100%);
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.priority {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-secondary, #718096);
+  letter-spacing: 0.05em;
+}
+
+.statusBadge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 9999px;
+}
+
+.notStarted {
+  background-color: var(--border-color, #edf2f7);
+  color: var(--text-secondary, #4a5568);
+}
+
+.inProgress {
+  background-color: rgba(49, 130, 206, 0.1);
+  color: #2b6cb0;
+}
+
+.completed {
+  background-color: rgba(56, 161, 105, 0.1);
+  color: #2f855a;
+}
+
+.title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-color, #1a202c);
+  margin: 0 0 8px 0;
+}
+
+.description {
+  font-size: 0.875rem;
+  color: var(--text-secondary, #4a5568);
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+  flex-grow: 1;
+}
+
+.scoreRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-top: 1px solid var(--border-color, #e2e8f0);
+  padding-top: 12px;
+  margin-bottom: 12px;
+}
+
+.scoreLabel {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-color, #2d3748);
+}
+
+.scoreValue {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--primary-color, #6b46c7);
+}
+
+.levelsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.levelRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  background: var(--body-bg, #f7fafc);
+  border: 1px solid var(--border-color, #edf2f7);
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.levelLocked {
+  opacity: 0.65;
+}
+
+.levelInfo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.levelNum {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-color, #4a5568);
+}
+
+.checkedIcon {
+  width: 14px;
+  height: 14px;
+  color: #38a169;
+}
+
+.lockIcon {
+  width: 12px;
+  height: 12px;
+  color: var(--text-secondary, #a0aec0);
+}
+
+.levelActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.levelScore {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-color, #4a5568);
+}
+
+.levelBtn {
+  background: var(--primary-color, #6b46c7);
+  color: #ffffff;
+  border: none;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.levelBtn:hover:not(:disabled) {
+  background: #553c9a;
+}
+
+.levelBtn:disabled {
+  background: var(--border-color, #cbd5e0);
+  color: var(--text-secondary, #a0aec0);
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.lockedLabel {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary, #a0aec0);
+}
+
+.detailsBtn {
+  background: none;
+  border: 1px dashed var(--border-color, #cbd5e0);
+  color: var(--primary-color, #6b46c7);
+  padding: 8px 12px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.detailsBtn:hover {
+  background: rgba(107, 70, 193, 0.05);
+  border-color: var(--primary-color, #6b46c7);
+}
