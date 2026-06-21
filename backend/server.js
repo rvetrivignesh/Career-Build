@@ -10,7 +10,7 @@ import assessmentRoutes from "./routes/assessmentRoutes.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import errorHandler from "./middleware/errorHandler.js";
 
-dotenv.config();
+dotenv.config({ override: true });
 connectDB();
 
 const app = express();

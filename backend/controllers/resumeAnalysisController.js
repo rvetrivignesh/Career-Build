@@ -30,6 +30,13 @@ export const analyzeResume = async (req, res, next) => {
       data: result,
     });
   } catch (error) {
+    if (error.needsReprocessing) {
+      return res.status(400).json({
+        success: false,
+        error: error.message,
+        needsReprocessing: true,
+      });
+    }
     next(error);
   }
 };

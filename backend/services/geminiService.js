@@ -234,3 +234,157 @@ Ensure to return only valid JSON without markdown wrapping. Do not generate any 
   return await callGemini(prompt);
 };
 
+export const analyzeResumeWithGemini = async (fileBuffer, fileMimeType, resumeText, targetRole, roleProfile, userProgress) => {
+  const prompt = `
+You are an expert ATS (Applicant Tracking System) Resume Reviewer and Career Coach.
+Analyze the attached candidate's resume (provided as a native PDF document file or raw text if DOCX) against the target role: "${targetRole}".
+
+Target Role Profile Requirements:
+- Core Skills: ${JSON.stringify(roleProfile?.coreSkills || [])}
+- Secondary Skills: ${JSON.stringify(roleProfile?.secondarySkills || [])}
+- Tools: ${JSON.stringify(roleProfile?.tools || [])}
+- Technical Keywords: ${JSON.stringify(roleProfile?.technicalKeywords || [])}
+
+User's Learning & Assessment Progress on our Platform:
+- Skills they assessed/completed: ${JSON.stringify(userProgress?.completedSkills || [])}
+- Highest quiz score per skill: ${JSON.stringify(userProgress?.quizScores || {})}
+
+Analyze the resume's technology stack, work experience, projects, and educational background against these requirements. Understand the text semantically (e.g., if the resume mentions 'Node/Express' and 'MongoDB', then 'Node.js', 'Express.js', and 'MongoDB' are present). Detect skills, internships/experience, projects, and education correctly, regardless of column or page formatting.
+
+Evaluate:
+1. Overall Resume Score (0-100)
+2. ATS Compatibility Score (0-100)
+3. Technical Skills Score (0-100)
+4. Project Quality Score (0-100)
+5. Experience Score (0-100)
+6. Education Score (0-100)
+7. Industry Readiness Score (0-100)
+8. Communication Score (0-100)
+
+Return a strict, valid JSON object containing exactly the fields listed below. Do not wrap in markdown blocks (such as \`\`\`json), do not include any explanatory notes, or pre/post-text.
+
+JSON Output Schema:
+{
+  "overallScore": number (0-100),
+  "atsScore": number (0-100),
+  "technicalScore": number (0-100),
+  "projectScore": number (0-100),
+  "experienceScore": number (0-100),
+  "educationScore": number (0-100),
+  "industryReadiness": number (0-100),
+  "communicationScore": number (0-100),
+  "candidate": {
+    "name": "Candidate's full name (or empty string if not found)",
+    "email": "Candidate's email (or empty string if not found)",
+    "phone": "Candidate's phone number (or empty string if not found)",
+    "location": "Candidate's location/address (or empty string if not found)"
+  },
+  "skills": ["Array of core technical/soft skills extracted from the resume"],
+  "frameworks": ["Array of frameworks/libraries extracted from the resume"],
+  "databases": ["Array of databases extracted from the resume"],
+  "tools": ["Array of tools/IDEs/platforms extracted from the resume"],
+  "projects": [
+    {
+      "title": "Project Title",
+      "description": "Short description of project and achievements",
+      "technologies": ["List of technologies used in this project"]
+    }
+  ],
+  "experience": [
+    {
+      "company": "Company Name",
+      "role": "Job/Internship Title",
+      "description": "Description of work done and accomplishments",
+      "duration": "Duration or years of employment, e.g. 'June 2024 - Present' or '6 months'"
+    }
+  ],
+  "education": [
+    {
+      "institute": "University or School Name",
+      "degree": "Degree and major description",
+      "duration": "Graduation year or duration of studies, e.g. '2020 - 2024'"
+    }
+  ],
+  "strengths": ["3-5 clear, specific professional strengths identified in the resume (as strings)"],
+  "weaknesses": ["3-5 clear, specific weaknesses or gaps in the resume (as strings)"],
+  "missingSkills": ["List of core/secondary skills from the Target Role Profile that are missing from this resume (as strings)"],
+  "recommendations": ["3-5 highly actionable suggestions to improve the resume or career preparedness (as strings)"],
+  "careerPreparedness": {
+    "technicalSkills": number (0-100, matching technicalScore),
+    "projects": number (0-100, matching projectScore),
+    "experience": number (0-100, matching experienceScore),
+    "resumeQuality": number (0-100, matching communicationScore),
+    "industryReadiness": number (0-100, matching industryReadiness)
+  }
+}
+`;
+
+  const parts = [];
+  if (fileBuffer && fileMimeType === "application/pdf") {
+    parts.push({
+      inlineData: {
+        mimeType: "application/pdf",
+        data: fileBuffer.toString("base64")
+      }
+    });
+  } else if (resumeText) {
+    parts.push({
+      text: `Candidate's Resume Text (Extracted):\n"""\n${resumeText}\n"""`
+    });
+  }
+
+  parts.push({
+    text: prompt
+  });
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY is not defined in environment variables");
+  }
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: parts,
+          },
+        ],
+        generationConfig: {
+          responseMimeType: "application/json",
+        },
+      }),
+    }
+  );
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+  }
+
+  const result = await response.json();
+  if (
+    !result.candidates ||
+    result.candidates.length === 0 ||
+    !result.candidates[0].content ||
+    !result.candidates[0].content.parts ||
+    result.candidates[0].content.parts.length === 0
+  ) {
+    throw new Error("Invalid or empty response from Gemini API");
+  }
+
+  let jsonText = result.candidates[0].content.parts[0].text.trim();
+
+  if (jsonText.startsWith("```")) {
+    jsonText = jsonText.replace(/^```json\s*/i, "").replace(/```$/, "").trim();
+  }
+
+  return JSON.parse(jsonText);
+};
+
+
