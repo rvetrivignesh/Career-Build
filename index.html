@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/Career-Build/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Career-Build</title>
+    <script>
+      (function() {
+        const savedTheme = localStorage.getItem("theme");
+        const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const theme = savedTheme || (systemPrefersDark ? "dark" : "light");
+        document.documentElement.setAttribute("data-theme", theme);
+        const meta = document.querySelector('meta[name="color-scheme"]');
+        if (meta) {
+          meta.content = theme === "dark" ? "dark" : "light";
+        }
+      })();
+    </script>
+    <script type="module" crossorigin src="/Career-Build/assets/index-DkYV7otz.js"></script>
+    <link rel="modulepreload" crossorigin href="/Career-Build/assets/jsx-runtime-bzQ4Vb5N.js">
+    <link rel="stylesheet" crossorigin href="/Career-Build/assets/index-0-gP7zng.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
