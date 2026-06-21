@@ -31,7 +31,7 @@ export const useResumeAnalyzer = () => {
     }
   }, [token]);
 
-  const runAnalysis = async (file, targetRole, runAdvanced = false) => {
+  const runAnalysis = async (file, targetRole) => {
     if (!token) return;
     let stepInterval = null;
     try {
@@ -60,23 +60,15 @@ export const useResumeAnalyzer = () => {
         }
       }, 1500);
 
-      const result = await analyzerService.analyzeResume(file, targetRole, token, runAdvanced);
+      const result = await analyzerService.analyzeResume(file, targetRole, token, false);
 
       if (stepInterval) clearInterval(stepInterval);
       setAnalysisProgressStep(5); // Complete
 
-      if (result && result.fallbackTriggered) {
-        setFallbackDiagnostics(result.diagnostics);
-        setPendingFile(file);
-        setPendingTargetRole(targetRole);
-        setStep("fallback");
-        showToast("Resume parsing confidence is low. Advanced analysis recommended.", "warning");
-      } else {
-        setActiveAnalysis(result);
-        setHistory((prev) => [result, ...prev]);
-        setStep("results");
-        showToast("Resume analyzed successfully!", "success");
-      }
+      setActiveAnalysis(result);
+      setHistory((prev) => [result, ...prev]);
+      setStep("results");
+      showToast("Resume analyzed successfully!", "success");
     } catch (err) {
       if (stepInterval) clearInterval(stepInterval);
       console.error(err);
@@ -85,12 +77,6 @@ export const useResumeAnalyzer = () => {
       showToast(err.message || "Analysis failed", "error");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const runAdvancedAnalysis = async () => {
-    if (pendingFile && pendingTargetRole) {
-      await runAnalysis(pendingFile, pendingTargetRole, true);
     }
   };
 
@@ -134,6 +120,7 @@ export const useResumeAnalyzer = () => {
     setFallbackDiagnostics(null);
     setPendingFile(null);
     setPendingTargetRole(null);
+    setError(null);
     setStep("upload");
   };
 
@@ -148,7 +135,6 @@ export const useResumeAnalyzer = () => {
     error,
     loadHistory,
     runAnalysis,
-    runAdvancedAnalysis,
     viewAnalysis,
     removeAnalysis,
     resetAnalyzer,

@@ -14,15 +14,14 @@ export const ResumeAnalyzerPage = () => {
     loading,
     statusMessage,
     analysisProgressStep,
-    fallbackDiagnostics,
     history,
     activeAnalysis,
     loadHistory,
     runAnalysis,
-    runAdvancedAnalysis,
     viewAnalysis,
     removeAnalysis,
     resetAnalyzer,
+    error,
   } = useResumeAnalyzer();
 
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
@@ -98,40 +97,23 @@ export const ResumeAnalyzerPage = () => {
                 })}
               </div>
             </div>
-          ) : step === "fallback" && fallbackDiagnostics ? (
+          ) : error && (error.toLowerCase().includes("incomplete") || error.toLowerCase().includes("parse") || error.toLowerCase().includes("empty") || error.toLowerCase().includes("scannable") || error.toLowerCase().includes("failed")) ? (
             <div className={styles.fallbackContainer}>
               <div className={styles.fallbackWarning}>
-                <h3 className={styles.fallbackTitle}>Unable to fully analyze resume</h3>
-                <p className={styles.fallbackText}>
-                  Our local parser detected low confidence in structure mapping. This happens with non-standard formatting, tables, or complex layouts.
-                </p>
-                <div className={styles.diagnosticsBox}>
-                  <strong>Extraction Diagnostics Summary:</strong>
-                  <ul>
-                    <li>Extracted Length: {fallbackDiagnostics.rawTextLength} characters</li>
-                    <li>Skills Found: {fallbackDiagnostics.skillsFoundCount}</li>
-                    <li>Experience Items: {fallbackDiagnostics.experienceFoundCount}</li>
-                    <li>Education Items: {fallbackDiagnostics.educationFoundCount}</li>
-                    <li>Projects Found: {fallbackDiagnostics.projectsFoundCount}</li>
-                    <li>Parsing Confidence: {fallbackDiagnostics.parsingConfidence}%</li>
-                  </ul>
-                </div>
-                <p className={styles.fallbackActionText}>
-                  Would you like to trigger Advanced Extraction? This will request Gemini to unbundle sections before evaluation.
+                <h3 className={styles.fallbackTitle}>Unable to Parse Resume</h3>
+                <p className={styles.fallbackText} style={{ fontSize: "16px", color: "var(--error-color)", fontWeight: "600", margin: "16px 0" }}>
+                  We couldn't reliably parse this resume. Please try another file or upload a DOCX version.
                 </p>
                 <div className={styles.fallbackActions}>
-                  <Button onClick={runAdvancedAnalysis} variant="primary" loading={loading}>
-                    Run Advanced Analysis
-                  </Button>
-                  <Button onClick={resetAnalyzer} variant="secondary">
-                    Cancel & Try Again
+                  <Button onClick={resetAnalyzer} variant="primary">
+                    Try Another File
                   </Button>
                 </div>
               </div>
             </div>
           ) : step === "results" && activeAnalysis ? (
             /* Set score variables dynamically on the container so conic-gradients paint perfectly */
-            <div style={{ "--value": activeAnalysis.atsScore }}>
+            <div style={{ "--value": activeAnalysis.overallScore || activeAnalysis.atsScore }}>
               <AnalysisResults analysis={activeAnalysis} onReset={resetAnalyzer} />
             </div>
           ) : (

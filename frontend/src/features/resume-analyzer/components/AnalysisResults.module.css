@@ -2,23 +2,142 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  animation: fadeIn 0.4s ease-out;
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Candidate Profile Header Card */
+.profileHeaderCard {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  position: relative;
+  overflow: hidden;
+  text-align: left;
+}
+
+@media (min-width: 640px) {
+  .profileHeaderCard {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+/* Glass effect highlight at top left */
+.profileHeaderCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, rgba(26, 115, 232, 0.1) 0%, rgba(26, 115, 232, 0) 70%);
+  pointer-events: none;
+}
+
+.profileAvatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-color) 0%, #3b82f6 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 800;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  flex-shrink: 0;
+  border: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.profileDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-grow: 1;
+}
+
+.candidateName {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--text-color);
+  margin: 0;
+}
+
+.candidateRole {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.candidateRole strong {
+  color: var(--primary-color);
+}
+
+.candidateContacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.contactItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Top Score Dashboard Grid */
 .summaryGrid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 20px;
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .summaryGrid {
+    grid-template-columns: 4fr 8fr;
+  }
 }
 
 .overallScoreCard,
 .subScoresCard {
-  background-color: var(--card-bg);
+  background: var(--card-bg);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
+  border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   display: flex;
   flex-direction: column;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.overallScoreCard:hover,
+.subScoresCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
 }
 
 .overallScoreCard {
@@ -28,112 +147,138 @@
 }
 
 .cardHeaderTitle {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--text-muted);
   text-transform: uppercase;
-  margin: 0 0 12px 0;
-  letter-spacing: 0.5px;
+  margin: 0 0 16px 0;
+  letter-spacing: 0.8px;
 }
 
-.overallScoreContainer {
+/* Radial SVG progress circle styling */
+.radialProgressContainer {
+  position: relative;
   display: flex;
-  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  gap: 8px;
+  margin: 12px 0 20px 0;
 }
 
-.scoreWrap {
-  display: flex;
-  align-items: baseline;
-  gap: 2px;
+.radialSvg {
+  display: block;
 }
 
-.overallScoreVal {
-  font-size: 48px;
+.circleBg {
+  stroke: rgba(255, 255, 255, 0.04);
+}
+
+.circleProgress {
+  transition: stroke-dashoffset 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.strokeHigh {
+  stroke: #10b981;
+  filter: drop-shadow(0 0 4px rgba(16, 185, 129, 0.3));
+}
+
+.strokeMedium {
+  stroke: #f59e0b;
+  filter: drop-shadow(0 0 4px rgba(245, 158, 11, 0.3));
+}
+
+.strokeLow {
+  stroke: var(--error-color);
+  filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.3));
+}
+
+.radialText {
+  font-family: inherit;
+  font-size: 26px;
   font-weight: 800;
-  color: var(--text-color);
-  line-height: 1;
-}
-
-.overallScoreMax {
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--text-muted);
+  fill: var(--text-color);
 }
 
 .matchLevelBadge {
   font-size: 11px;
   font-weight: 700;
   text-transform: uppercase;
-  padding: 4px 12px;
+  padding: 6px 14px;
   border-radius: 20px;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .matchStrong {
-  background-color: rgba(34, 197, 94, 0.1);
-  color: #22c55e;
+  background-color: rgba(16, 185, 129, 0.1);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.2);
 }
 
 .matchModerate {
-  background-color: rgba(234, 179, 8, 0.1);
-  color: #eab308;
+  background-color: rgba(245, 158, 11, 0.1);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.2);
 }
 
 .matchImprovement {
   background-color: rgba(239, 68, 68, 0.1);
   color: var(--error-color);
+  border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
-.overallMeta {
-  margin-top: 16px;
-  font-size: 13px;
-  color: var(--text-color);
+/* Sub-Scores progress list */
+.subScoresCard {
+  align-items: stretch;
 }
 
 .panelTitle {
   font-size: 15px;
   font-weight: 700;
   color: var(--text-color);
-  margin: 0 0 16px 0;
+  margin: 0 0 20px 0;
   align-self: flex-start;
-}
-
-/* Sub-Scores list */
-.subScoresCard {
-  align-items: stretch;
+  text-align: left;
 }
 
 .subScoreList {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   width: 100%;
 }
 
 .subScoreItem {
-  display: grid;
-  grid-template-columns: 150px 1fr 45px;
-  align-items: center;
-  gap: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
   width: 100%;
-  text-align: left;
+}
+
+.subScoreLabelRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
 .subScoreLabel {
   font-size: 13px;
   font-weight: 600;
   color: var(--text-color);
-  white-space: nowrap;
+}
+
+.subScoreVal {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-color);
 }
 
 .progressBarContainer {
-  height: 8px;
-  background-color: rgba(255, 255, 255, 0.05);
+  height: 6px;
+  background-color: rgba(255, 255, 255, 0.03);
   border-radius: 4px;
   overflow: hidden;
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(255, 255, 255, 0.05);
   width: 100%;
   position: relative;
 }
@@ -141,108 +286,116 @@
 .progressBarFill {
   height: 100%;
   border-radius: 4px;
-  transition: width 0.5s ease-out;
+  transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .progressBarFill.scoreHigh {
-  background-color: #22c55e;
+  background: linear-gradient(90deg, #10b981 0%, #059669 100%);
 }
+
 .progressBarFill.scoreMedium {
-  background-color: #eab308;
+  background: linear-gradient(90deg, #f59e0b 0%, #d97706 100%);
 }
+
 .progressBarFill.scoreLow {
-  background-color: var(--error-color);
+  background: linear-gradient(90deg, var(--error-color) 0%, #dc2626 100%);
 }
 
-.subScoreVal {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text-color);
-  text-align: right;
+/* Extracted Skills Inventory styling */
+.skillsInventoryCard {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  text-align: left;
 }
 
-/* Accordion */
-.accordionList {
+.skillsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 640px) {
+  .skillsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .skillsGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.skillsCol {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-}
-
-.accordion {
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  overflow: hidden;
-  background-color: var(--card-bg);
-}
-
-.accordionHeader {
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  background: none;
-  border: none;
-  color: var(--text-color);
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  text-align: left;
   transition: background-color 0.2s;
 }
 
-.accordionHeader:hover {
-  background-color: rgba(255, 255, 255, 0.02);
+.skillsCol:hover {
+  background: rgba(255, 255, 255, 0.04);
 }
 
-.headerText {
+.skillsColTitle {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-color);
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-
-.accordionBody {
-  padding: 16px;
-  border-top: 1px solid var(--border-color);
-  background-color: rgba(0, 0, 0, 0.08);
-  text-align: left;
-}
-
-.tagGroup {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.tagGroupTitle {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text-muted);
-  text-transform: uppercase;
+  gap: 6px;
   margin: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding-bottom: 8px;
 }
 
-.tagContainer {
+.skillsColTitle svg {
+  color: var(--primary-color);
+}
+
+.badgeContainer {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
 }
 
 .tag {
   font-size: 11px;
   font-weight: 600;
-  padding: 4px 10px;
-  border-radius: 20px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .tagSkill {
-  background-color: rgba(26, 115, 232, 0.1);
-  color: var(--primary-color);
+  background: rgba(37, 99, 235, 0.08);
+  color: #60a5fa;
+  border-color: rgba(37, 99, 235, 0.15);
 }
 
-.tagKeyword {
-  background-color: rgba(234, 179, 8, 0.1);
-  color: #eab308;
+.tagFramework {
+  background: rgba(139, 92, 246, 0.08);
+  color: #a78bfa;
+  border-color: rgba(139, 92, 246, 0.15);
+}
+
+.tagDatabase {
+  background: rgba(16, 185, 129, 0.08);
+  color: #34d399;
+  border-color: rgba(16, 185, 129, 0.15);
+}
+
+.tagTool {
+  background: rgba(245, 158, 11, 0.08);
+  color: #fbbf24;
+  border-color: rgba(245, 158, 11, 0.15);
 }
 
 .noneText {
@@ -251,207 +404,405 @@
   font-style: italic;
 }
 
-/* Evaluation Cards Grid */
-.evaluationCardsGrid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-}
-
-.evalCard {
-  background-color: var(--card-bg);
+/* Extracted Timeline & Project Tab view */
+.detailsTabsCard {
+  background: var(--card-bg);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   text-align: left;
+}
+
+.tabsHeader {
   display: flex;
-  flex-direction: column;
+  gap: 8px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1px;
+  overflow-x: auto;
 }
 
-.strengthsCard {
-  border-top: 4px solid #22c55e;
-}
-
-.weaknessesCard {
-  border-top: 4px solid var(--error-color);
-}
-
-.nextActionsCard {
-  border-top: 4px solid var(--primary-color);
-}
-
-.evalCardHeader {
+.tabBtn {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 8px;
+  gap: 8px;
+  padding: 12px 18px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
 }
 
-.evalCardTitle {
+.tabBtn:hover {
+  color: var(--text-color);
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px 8px 0 0;
+}
+
+.tabActive {
+  color: var(--primary-color);
+  border-bottom: 2px solid var(--primary-color);
+}
+
+.tabContent {
+  padding-top: 24px;
+}
+
+/* Work Experience Timeline */
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  position: relative;
+  padding-left: 20px;
+}
+
+.timeline::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 5px;
+  bottom: 4px;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.timelineItem {
+  position: relative;
+}
+
+.timelineDot {
+  position: absolute;
+  left: -20px;
+  top: 5px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  border: 3px solid var(--card-bg);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.timelineHeader {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.timelineTitle {
   font-size: 15px;
   font-weight: 700;
   color: var(--text-color);
   margin: 0;
 }
 
-.strengthsIcon {
-  color: #22c55e;
+.timelineDuration {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
 }
 
-.weaknessesIcon {
-  color: var(--error-color);
-}
-
-.nextActionsIcon {
-  color: var(--primary-color);
-}
-
-.evalCardBody {
-  flex: 1;
-}
-
-.bullets {
-  padding-left: 18px;
-  margin: 0;
+.timelineSub {
   font-size: 13px;
-  color: var(--text-color);
+  font-weight: 600;
+  color: var(--primary-color);
+  margin: 4px 0 8px 0;
 }
 
-.bullets li {
-  margin-bottom: 8px;
-  line-height: 1.5;
+.timelineText {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0;
+  white-space: pre-line;
 }
 
-.recommendationGrid {
+/* Projects grid tab content */
+.projectsGrid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px;
-  margin-top: 10px;
-}
-
-.recommendCard {
-  background-color: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 12px;
-}
-
-.recommendCard strong {
-  font-size: 13px;
-  color: var(--text-color);
-}
-
-.recommendCard p {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin: 4px 0 0 0;
-  line-height: 1.4;
-}
-
-.listTitle {
-  font-size: 13px;
-  font-weight: 700;
-  text-transform: uppercase;
-  margin: 0 0 10px 0;
-}
-
-/* V2 Styles */
-.confidenceGrid {
-  display: grid;
-  grid-template-columns: repeat(1, 1fr);
-  gap: 12px;
-  margin-top: 10px;
+  gap: 16px;
 }
 
 @media (min-width: 640px) {
-  .confidenceGrid {
+  .projectsGrid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-.confidenceCard {
-  background-color: var(--card-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  padding: 12px 16px;
+.projectCard {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  padding: 18px;
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  position: relative;
-  text-align: left;
+  gap: 12px;
 }
 
-.confidenceSkill {
+.projectTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-color);
+  margin: 0;
+}
+
+.projectDescription {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+.projectTech {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: auto;
+}
+
+.techTag {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-muted);
+}
+
+/* Education List tab content */
+.educationList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-left: 20px;
+  position: relative;
+}
+
+.educationList::before {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 5px;
+  bottom: 4px;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.educationItem {
+  position: relative;
+}
+
+.eduDot {
+  position: absolute;
+  left: -20px;
+  top: 5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #a78bfa;
+  border: 2px solid var(--card-bg);
+}
+
+.eduHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.eduInstitute {
   font-size: 14px;
   font-weight: 700;
   color: var(--text-color);
+  margin: 0;
 }
 
-.confidenceBadge {
-  font-size: 10px;
-  font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 4px;
-  width: max-content;
-  text-transform: uppercase;
-}
-
-.badgeHigh {
-  background-color: rgba(34, 197, 94, 0.1);
-  color: #22c55e;
-}
-
-.badgeMedium {
-  background-color: rgba(234, 179, 8, 0.1);
-  color: #eab308;
-}
-
-.badgeLow {
-  background-color: rgba(239, 68, 68, 0.1);
-  color: var(--error-color);
-}
-
-.confidenceDetails {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  font-size: 11px;
+.eduDuration {
+  font-size: 12px;
   color: var(--text-muted);
-  margin-top: 4px;
-  border-top: 1px solid var(--border-color);
-  padding-top: 6px;
 }
 
-/* Mobile Stacking for Breakdown Grid */
-@media (max-width: 640px) {
-  .subScoreItem {
-    grid-template-columns: 1fr auto;
-    gap: 8px;
-  }
-  
-  .progressBarContainer {
-    grid-column: span 2;
-    order: 3;
-  }
-  
-  .subScoreVal {
-    order: 2;
-  }
+.eduDegree {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 4px 0 0 0;
+}
+
+.noData {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-style: italic;
+  margin: 0;
+}
+
+/* Strengths & Weaknesses Comparison Cards */
+.strengthsWeaknessesGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
 }
 
 @media (min-width: 768px) {
-  .summaryGrid {
-    grid-template-columns: 4fr 8fr;
+  .strengthsWeaknessesGrid {
+    grid-template-columns: repeat(2, 1fr);
   }
-  
-  .evaluationCardsGrid {
-    grid-template-columns: repeat(3, 1fr);
-  }
+}
 
-  .recommendationGrid {
-    grid-template-columns: 1fr 1fr;
+.evalPanel {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  text-align: left;
+}
+
+.strengthsPanel {
+  border-top: 4px solid #10b981;
+}
+
+.weaknessesPanel {
+  border-top: 4px solid var(--error-color);
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-color);
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+}
+
+.strengthsPanel .panelHeader svg {
+  color: #10b981;
+}
+
+.weaknessesPanel .panelHeader svg {
+  color: var(--error-color);
+}
+
+.evalList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.evalList li {
+  font-size: 13px;
+  color: var(--text-color);
+  line-height: 1.5;
+  position: relative;
+  padding-left: 20px;
+}
+
+.evalList li::before {
+  content: "•";
+  position: absolute;
+  left: 6px;
+  font-weight: bold;
+}
+
+.strengthsPanel .evalList li::before {
+  color: #10b981;
+}
+
+.weaknessesPanel .evalList li::before {
+  color: var(--error-color);
+}
+
+/* Missing Gaps and Actionable Recommendations */
+.recommendationsGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 768px) {
+  .recommendationsGrid {
+    grid-template-columns: repeat(2, 1fr);
   }
+}
+
+.recommendCardCustom {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+  text-align: left;
+}
+
+.recommendCardTitle {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-color);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px 0;
+}
+
+.recommendCardTitle svg {
+  color: var(--primary-color);
+}
+
+.recommendCardSub {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+.recommendCardSub strong {
+  color: var(--primary-color);
+}
+
+.missingSkillsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.missingSkillTag {
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(239, 68, 68, 0.08);
+  color: #f87171;
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(239, 68, 68, 0.15);
+}
+
+.allSkillsMatched {
+  font-size: 13px;
+  color: #10b981;
+  font-weight: 600;
+}
+
+.bulletsList {
+  padding-left: 20px;
+  margin: 0;
+}
+
+.bulletsList li {
+  font-size: 13px;
+  color: var(--text-color);
+  line-height: 1.6;
+  margin-bottom: 8px;
 }
