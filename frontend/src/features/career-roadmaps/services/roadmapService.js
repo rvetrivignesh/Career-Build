@@ -1,4 +1,5 @@
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000";
+import { API_BASE_URL } from "@config/api";
+const API_URL = API_BASE_URL;
 
 /**
  * Service to interact with Career Roadmaps and Quiz API endpoints

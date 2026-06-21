@@ -10,7 +10,8 @@
       "@contexts/*": ["src/shared/contexts/*"],
       "@theme/*": ["src/shared/theme/*"],
       "@layouts/*": ["src/layouts/*"],
-      "@assets/*": ["src/shared/assets/*"]
+      "@assets/*": ["src/shared/assets/*"],
+      "@config/*": ["src/config/*"]
     }
   },
   "include": ["src/**/*"]

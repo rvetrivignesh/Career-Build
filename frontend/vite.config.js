@@ -9,6 +9,7 @@ const __dirname = path.dirname(__filename)
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  base: "/Career-Build/",
   resolve: {
     alias: {
       '@components': path.resolve(__dirname, './src/shared/components'),
@@ -20,6 +21,7 @@ export default defineConfig({
       '@theme': path.resolve(__dirname, './src/shared/theme'),
       '@layouts': path.resolve(__dirname, './src/layouts'),
       '@assets': path.resolve(__dirname, './src/shared/assets'),
+      '@config': path.resolve(__dirname, './src/config'),
     }
   }
 })
