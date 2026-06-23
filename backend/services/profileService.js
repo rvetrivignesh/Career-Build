@@ -1,4 +1,5 @@
 import UserProfile from "../models/UserProfile.js";
+import { callGroq } from "./geminiService.js";
 
 // Helper to parse month names into numerical index
 const getMonthValue = (m) => {
@@ -115,4 +116,73 @@ export const updateProfile = async (userId, data) => {
 
   await profile.save();
   return getProfileByUserId(userId);
+};
+
+export const getRecommendedRoles = async (userId) => {
+  const profile = await UserProfile.findOne({ user: userId }).select("skills").lean();
+  if (!profile || !profile.skills || profile.skills.length === 0) {
+    return [
+      {
+        roleName: "Frontend Developer",
+        matchExplanation: "Build responsive user interfaces using HTML, CSS, and modern framework libraries.",
+        typicalSkills: ["JavaScript", "React", "CSS Grid", "HTML5"]
+      },
+      {
+        roleName: "Backend Developer",
+        matchExplanation: "Design server-side logic, write database queries, and implement backend architecture APIs.",
+        typicalSkills: ["Node.js", "Express.js", "MongoDB", "SQL"]
+      },
+      {
+        roleName: "Full Stack Developer",
+        matchExplanation: "Work across both clientside frontend and backend logic to deploy complete products.",
+        typicalSkills: ["JavaScript", "React", "Node.js", "MongoDB"]
+      }
+    ];
+  }
+
+  const prompt = `
+You are an expert career advisor.
+Given a candidate's list of skills: ${JSON.stringify(profile.skills)}
+Recommend exactly 3 job roles that would be a great fit for these skills.
+Return the result in strict JSON format matching the schema below.
+Do not include markdown code block formatting (such as \`\`\`json), backticks, or any conversational text.
+
+Expected Output JSON Schema:
+{
+  "recommendations": [
+    {
+      "roleName": "Software Engineer",
+      "matchExplanation": "Since you have skills in JavaScript and Node.js, you can build backend services.",
+      "typicalSkills": ["JavaScript", "Node.js", "Express.js"]
+    }
+  ]
+}
+`;
+
+  try {
+    const data = await callGroq(prompt);
+    if (data && Array.isArray(data.recommendations)) {
+      return data.recommendations;
+    }
+    throw new Error("Invalid format returned from Groq");
+  } catch (error) {
+    console.error("Failed to fetch recommended roles via Groq:", error);
+    return [
+      {
+        roleName: "Frontend Developer",
+        matchExplanation: "Build responsive user interfaces using HTML, CSS, and modern framework libraries.",
+        typicalSkills: ["JavaScript", "React", "CSS Grid", "HTML5"]
+      },
+      {
+        roleName: "Backend Developer",
+        matchExplanation: "Design server-side logic, write database queries, and implement backend architecture APIs.",
+        typicalSkills: ["Node.js", "Express.js", "MongoDB", "SQL"]
+      },
+      {
+        roleName: "Full Stack Developer",
+        matchExplanation: "Work across both clientside frontend and backend logic to deploy complete products.",
+        typicalSkills: ["JavaScript", "React", "Node.js", "MongoDB"]
+      }
+    ];
+  }
 };

@@ -55,3 +55,17 @@ export const updateProfile = async (req, res, next) => {
     next(error);
   }
 };
+
+// GET recommended roles based on skills
+export const getRecommendedRoles = async (req, res, next) => {
+  try {
+    const recommendations = await profileService.getRecommendedRoles(req.user._id);
+    res.status(200).json({
+      success: true,
+      message: "Recommended roles retrieved successfully",
+      data: recommendations,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

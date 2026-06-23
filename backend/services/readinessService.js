@@ -157,7 +157,7 @@ export const submitQuizAttempt = async (userId, quizId, userAnswers) => {
  * Call Gemini to get learning focus recommendations when a skill is completed
  */
 const generateSkillCompletedRecommendations = async (targetRole, skill, l1, l2, l3, total) => {
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     return ["Review advanced architectural concepts", "Optimize API calls", "Gain production testing experience"];
   }
@@ -187,35 +187,45 @@ Expected Output JSON Schema:
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      "https://api.groq.com/openai/v1/chat/completions",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          contents: [
+          model: "llama-3.1-8b-instant",
+          messages: [
             {
-              parts: [
-                {
-                  text: prompt,
-                },
-              ],
+              role: "user",
+              content: prompt,
             },
           ],
-          generationConfig: {
-            responseMimeType: "application/json",
+          response_format: {
+            type: "json_object",
           },
+          temperature: 0.2,
+          max_tokens: 4096,
         }),
       }
     );
 
     if (!response.ok) {
-      throw new Error(`Gemini API error: ${response.status}`);
+      throw new Error(`Groq API error: ${response.status}`);
     }
 
     const result = await response.json();
-    let jsonText = result.candidates[0].content.parts[0].text.trim();
+    if (
+      !result.choices ||
+      result.choices.length === 0 ||
+      !result.choices[0].message ||
+      !result.choices[0].message.content
+    ) {
+      throw new Error("Invalid or empty response from Groq API");
+    }
+
+    let jsonText = result.choices[0].message.content.trim();
 
     if (jsonText.startsWith("```")) {
       jsonText = jsonText.replace(/^```json\s*/i, "").replace(/```$/, "").trim();

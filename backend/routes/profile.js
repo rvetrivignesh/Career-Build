@@ -5,6 +5,7 @@ import {
   getProfileMe,
   createProfile,
   updateProfile,
+  getRecommendedRoles,
 } from "../controllers/profileController.js";
 
 const router = express.Router();
@@ -17,5 +18,6 @@ router.route("/")
   .put(validateProfile, updateProfile);
 
 router.get("/me", getProfileMe);
+router.get("/recommended-roles", getRecommendedRoles);
 
 export default router;

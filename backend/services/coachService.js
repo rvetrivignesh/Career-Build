@@ -60,10 +60,10 @@ export const getAIResponse = async (userId, chatId, newMessageText) => {
     }
   }
 
-  // 4. Construct Gemini API contents and systemInstruction
-  const apiKey = process.env.GEMINI_API_KEY;
+  // 4. Construct Groq API messages
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
-    throw new Error("GEMINI_API_KEY is not defined in environment variables");
+    throw new Error("GROQ_API_KEY is not defined in environment variables");
   }
 
   const systemPrompt = `
@@ -82,71 +82,64 @@ Instructions:
 6. Provide helpful, conversational responses.
 `;
 
-  const contents = [];
+  const messages = [
+    {
+      role: "system",
+      content: systemPrompt,
+    },
+  ];
 
-  // Map history to Gemini content format
+  // Map history to OpenAI message format
   prunedHistory.forEach((msg) => {
-    contents.push({
-      role: msg.role === "user" ? "user" : "model",
-      parts: [
-        {
-          text: msg.content,
-        },
-      ],
+    messages.push({
+      role: msg.role === "user" ? "user" : "assistant",
+      content: msg.content,
     });
   });
 
   // Append new user message
-  contents.push({
+  messages.push({
     role: "user",
-    parts: [
-      {
-        text: newMessageText,
-      },
-    ],
+    content: newMessageText,
   });
 
   try {
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+      "https://api.groq.com/openai/v1/chat/completions",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          contents,
-          systemInstruction: {
-            parts: [
-              {
-                text: systemPrompt,
-              },
-            ],
-          },
+          model: "llama-3.1-8b-instant",
+          messages,
+          temperature: 0.7,
+          max_tokens: 2048,
         }),
       }
     );
 
     if (!response.ok) {
       const errorText = await response.text();
-      throw new Error(`Gemini API error: ${response.status} - ${errorText}`);
+      throw new Error(`Groq API error: ${response.status} - ${errorText}`);
     }
 
     const result = await response.json();
     if (
-      !result.candidates ||
-      result.candidates.length === 0 ||
-      !result.candidates[0].content ||
-      !result.candidates[0].content.parts ||
-      result.candidates[0].content.parts.length === 0
+      !result.choices ||
+      result.choices.length === 0 ||
+      !result.choices[0].message ||
+      !result.choices[0].message.content
     ) {
-      throw new Error("Invalid or empty response from Gemini API");
+      throw new Error("Invalid or empty response from Groq API");
     }
 
-    const responseText = result.candidates[0].content.parts[0].text.trim();
+    const responseText = result.choices[0].message.content.trim();
     return responseText;
   } catch (error) {
-    console.error("AI Coach Gemini error:", error);
+    console.error("AI Coach Groq error:", error);
     throw new Error(`AI Coach failed to respond: ${error.message}`);
   }
 };
