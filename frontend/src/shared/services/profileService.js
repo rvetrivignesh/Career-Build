@@ -52,3 +52,18 @@ export const updateProfile = async (profileData, token) => {
   }
   return data.data;
 };
+
+export const getRecommendedRoles = async (token) => {
+  const response = await fetch(`${API_URL}/api/profile/recommended-roles`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.message || data.errors?.[0] || "Failed to fetch recommended roles");
+  }
+  return data.data;
+};

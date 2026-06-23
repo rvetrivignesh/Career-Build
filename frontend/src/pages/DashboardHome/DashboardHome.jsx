@@ -1,13 +1,34 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@contexts/AuthContext";
+import { getRecommendedRoles } from "@services/profileService";
 import { Sparkles, FileText, Compass } from "lucide-react";
 import styles from "./DashboardHome.module.css";
 
 export const DashboardHome = () => {
-  const { userProfile, user } = useAuth();
+  const { userProfile, user, token } = useAuth();
   const navigate = useNavigate();
   const userName = userProfile?.fullName || user?.username || "Developer";
+
+  const [recommendations, setRecommendations] = useState([]);
+  const [loadingRecs, setLoadingRecs] = useState(true);
+
+  useEffect(() => {
+    const fetchRecommendations = async () => {
+      if (!token) return;
+      try {
+        setLoadingRecs(true);
+        const data = await getRecommendedRoles(token);
+        setRecommendations(data || []);
+      } catch (err) {
+        console.error("Failed to load role recommendations:", err);
+      } finally {
+        setLoadingRecs(false);
+      }
+    };
+
+    fetchRecommendations();
+  }, [token]);
 
   const statusCards = [
     {
@@ -54,6 +75,50 @@ export const DashboardHome = () => {
             </button>
           </div>
         ))}
+      </section>
+
+      {/* Recommended Job Roles Section */}
+      <section className={styles.recommendationsSection}>
+        <div>
+          <h3 className={styles.sectionTitle} style={{ margin: 0 }}>Recommended Job Roles</h3>
+          <p className={styles.sectionSubtitle}>AI Recommendations tailored to your profile skills</p>
+        </div>
+
+        {loadingRecs ? (
+          <div className={styles.loadingBox}>
+            <div className={styles.loader}></div>
+            <span>Analyzing skills...</span>
+          </div>
+        ) : recommendations.length > 0 ? (
+          <div className={styles.rolesGrid}>
+            {recommendations.map((rec) => (
+              <div key={rec.roleName} className={styles.roleCard}>
+                <div className={styles.roleHeader}>
+                  <h4 className={styles.roleName}>{rec.roleName}</h4>
+                </div>
+                <p className={styles.roleExplanation}>{rec.matchExplanation}</p>
+                
+                {rec.typicalSkills?.length > 0 && (
+                  <div className={styles.skillsContainer}>
+                    <span className={styles.skillsLabel}>Skills to master</span>
+                    <div className={styles.skillsTags}>
+                      {rec.typicalSkills.map((sk) => (
+                        <span key={sk} className={styles.roleSkillTag}>
+                          {sk}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className={styles.cardDesc} style={{ padding: "12px 0" }}>
+            Add skills to your profile to get personalized job role recommendations.
+          </p>
+        )}
       </section>
 
       {/* Profile Overview Card */}
