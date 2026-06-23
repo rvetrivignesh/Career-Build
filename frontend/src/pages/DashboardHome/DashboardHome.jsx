@@ -10,16 +10,30 @@ export const DashboardHome = () => {
   const navigate = useNavigate();
   const userName = userProfile?.fullName || user?.username || "Developer";
 
-  const [recommendations, setRecommendations] = useState([]);
-  const [loadingRecs, setLoadingRecs] = useState(true);
+  // Use cached recommended roles from the user profile if available to avoid API calls
+  const [recommendations, setRecommendations] = useState(userProfile?.recommendedRoles || []);
+  const [loadingRecs, setLoadingRecs] = useState(
+    !userProfile?.recommendedRoles || userProfile.recommendedRoles.length === 0
+  );
 
   useEffect(() => {
     const fetchRecommendations = async () => {
+      // If cached recommended roles are present in the user profile, use them immediately
+      if (userProfile?.recommendedRoles && userProfile.recommendedRoles.length > 0) {
+        setRecommendations(userProfile.recommendedRoles);
+        setLoadingRecs(false);
+        return;
+      }
+
       if (!token) return;
       try {
         setLoadingRecs(true);
         const data = await getRecommendedRoles(token);
         setRecommendations(data || []);
+        // Save in-memory cache to the userProfile object to prevent future requests on this session
+        if (userProfile && data) {
+          userProfile.recommendedRoles = data;
+        }
       } catch (err) {
         console.error("Failed to load role recommendations:", err);
       } finally {
@@ -28,7 +42,7 @@ export const DashboardHome = () => {
     };
 
     fetchRecommendations();
-  }, [token]);
+  }, [token, userProfile]);
 
   const statusCards = [
     {
