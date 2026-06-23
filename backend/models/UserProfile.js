@@ -308,6 +308,26 @@ const userProfileSchema = new mongoose.Schema(
             trim: true,
         },
 
+        recommendedRoles: [{
+            roleName: {
+                type: String,
+                trim: true,
+            },
+            matchExplanation: {
+                type: String,
+                trim: true,
+            },
+            typicalSkills: [{
+                type: String,
+                trim: true,
+            }],
+        }],
+
+        recommendedRolesSkills: [{
+            type: String,
+            trim: true,
+        }],
+
         profileCompleted: {
             type: Boolean,
             required: true,

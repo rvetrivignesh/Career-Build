@@ -52,6 +52,71 @@ const compareDates = (a, b, isExp = false) => {
   return startMonB - startMonA;
 };
 
+// Helper to check if two skills arrays are identical (case-insensitive, ignoring order)
+const checkSkillsEqual = (skillsA, skillsB) => {
+  const arrA = (skillsA || []).map(s => s.toLowerCase().trim()).sort();
+  const arrB = (skillsB || []).map(s => s.toLowerCase().trim()).sort();
+  
+  if (arrA.length !== arrB.length) return false;
+  return arrA.every((val, index) => val === arrB[index]);
+};
+
+// Helper to generate recommended roles from Groq AI with a fallback
+const generateRecommendationsFromAI = async (skills) => {
+  const fallback = [
+    {
+      roleName: "Frontend Developer",
+      matchExplanation: "Build responsive user interfaces using HTML, CSS, and modern framework libraries.",
+      typicalSkills: ["JavaScript", "React", "CSS Grid", "HTML5"]
+    },
+    {
+      roleName: "Backend Developer",
+      matchExplanation: "Design server-side logic, write database queries, and implement backend architecture APIs.",
+      typicalSkills: ["Node.js", "Express.js", "MongoDB", "SQL"]
+    },
+    {
+      roleName: "Full Stack Developer",
+      matchExplanation: "Work across both clientside frontend and backend logic to deploy complete products.",
+      typicalSkills: ["JavaScript", "React", "Node.js", "MongoDB"]
+    }
+  ];
+
+  if (!skills || skills.length === 0) {
+    return fallback;
+  }
+
+  const prompt = `
+You are an expert career advisor.
+Given a candidate's list of skills: ${JSON.stringify(skills)}
+Recommend exactly 3 job roles that would be a great fit for these skills.
+Return the result in strict JSON format matching the schema below.
+Do not include markdown code block formatting (such as \`\`\`json), backticks, or any conversational text.
+
+Expected Output JSON Schema:
+{
+  "recommendations": [
+    {
+      "roleName": "Software Engineer",
+      "matchExplanation": "Since you have skills in JavaScript and Node.js, you can build backend services.",
+      "typicalSkills": ["JavaScript", "Node.js", "Express.js"]
+    }
+  ]
+}
+`;
+
+  try {
+    const data = await callGroq(prompt);
+    if (data && Array.isArray(data.recommendations)) {
+      return data.recommendations;
+    }
+    console.warn("Invalid format returned from Groq, using fallback.");
+    return fallback;
+  } catch (error) {
+    console.error("Failed to fetch recommended roles via Groq, using fallback:", error);
+    return fallback;
+  }
+};
+
 // Get profile by user ID
 export const getProfileByUserId = async (userId) => {
   const profile = await UserProfile.findOne({ user: userId }).populate("user", "username email").lean();
@@ -77,9 +142,14 @@ export const createProfile = async (userId, data) => {
     throw error;
   }
 
+  // Eagerly generate recommended roles on creation
+  const recommendations = await generateRecommendationsFromAI(data.skills);
+
   const profile = new UserProfile({
     user: userId,
     ...data,
+    recommendedRoles: recommendations,
+    recommendedRolesSkills: data.skills || [],
     profileCompleted: true,
   });
 
@@ -91,6 +161,14 @@ export const createProfile = async (userId, data) => {
 export const updateProfile = async (userId, data) => {
   const profile = await UserProfile.findOne({ user: userId });
   if (!profile) return null;
+
+  // Check if skills have changed to regenerate recommendations cache
+  const skillsChanged = !checkSkillsEqual(profile.skills, data.skills);
+  if (skillsChanged) {
+    const recommendations = await generateRecommendationsFromAI(data.skills);
+    profile.recommendedRoles = recommendations;
+    profile.recommendedRolesSkills = data.skills || [];
+  }
 
   profile.fullName = data.fullName;
   profile.age = data.age;
@@ -119,8 +197,8 @@ export const updateProfile = async (userId, data) => {
 };
 
 export const getRecommendedRoles = async (userId) => {
-  const profile = await UserProfile.findOne({ user: userId }).select("skills").lean();
-  if (!profile || !profile.skills || profile.skills.length === 0) {
+  const profile = await UserProfile.findOne({ user: userId });
+  if (!profile) {
     return [
       {
         roleName: "Frontend Developer",
@@ -140,49 +218,22 @@ export const getRecommendedRoles = async (userId) => {
     ];
   }
 
-  const prompt = `
-You are an expert career advisor.
-Given a candidate's list of skills: ${JSON.stringify(profile.skills)}
-Recommend exactly 3 job roles that would be a great fit for these skills.
-Return the result in strict JSON format matching the schema below.
-Do not include markdown code block formatting (such as \`\`\`json), backticks, or any conversational text.
-
-Expected Output JSON Schema:
-{
-  "recommendations": [
-    {
-      "roleName": "Software Engineer",
-      "matchExplanation": "Since you have skills in JavaScript and Node.js, you can build backend services.",
-      "typicalSkills": ["JavaScript", "Node.js", "Express.js"]
-    }
-  ]
-}
-`;
-
-  try {
-    const data = await callGroq(prompt);
-    if (data && Array.isArray(data.recommendations)) {
-      return data.recommendations;
-    }
-    throw new Error("Invalid format returned from Groq");
-  } catch (error) {
-    console.error("Failed to fetch recommended roles via Groq:", error);
-    return [
-      {
-        roleName: "Frontend Developer",
-        matchExplanation: "Build responsive user interfaces using HTML, CSS, and modern framework libraries.",
-        typicalSkills: ["JavaScript", "React", "CSS Grid", "HTML5"]
-      },
-      {
-        roleName: "Backend Developer",
-        matchExplanation: "Design server-side logic, write database queries, and implement backend architecture APIs.",
-        typicalSkills: ["Node.js", "Express.js", "MongoDB", "SQL"]
-      },
-      {
-        roleName: "Full Stack Developer",
-        matchExplanation: "Work across both clientside frontend and backend logic to deploy complete products.",
-        typicalSkills: ["JavaScript", "React", "Node.js", "MongoDB"]
-      }
-    ];
+  // Check if cache exists and is valid (matches current skills)
+  if (
+    profile.recommendedRoles &&
+    profile.recommendedRoles.length > 0 &&
+    checkSkillsEqual(profile.skills, profile.recommendedRolesSkills)
+  ) {
+    return profile.recommendedRoles;
   }
+
+  // Cache is missing or invalid, generate new recommendations
+  const recommendations = await generateRecommendationsFromAI(profile.skills);
+  
+  // Save recommendations and current skills to profile cache
+  profile.recommendedRoles = recommendations;
+  profile.recommendedRolesSkills = profile.skills || [];
+  await profile.save();
+
+  return recommendations;
 };
