@@ -235,8 +235,16 @@ Ensure to return only valid JSON without markdown wrapping. Do not generate any 
 };
 
 export const analyzeResumeWithGemini = async (fileBuffer, fileMimeType, resumeText, targetRole, roleProfile, userProgress) => {
+  const currentDate = new Date().toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric"
+  });
+
   const prompt = `
 You are an expert ATS (Applicant Tracking System) Resume Reviewer and Career Coach.
+Today's date is: ${currentDate}. Ensure all evaluations, duration calculations, and timeline analyses (such as whether an internship, job, project, or degree is in the past, present, or future) are relative to this current date.
+
 Analyze the attached candidate's resume (provided as a native PDF document file or raw text if DOCX) against the target role: "${targetRole}".
 
 Target Role Profile Requirements:
@@ -357,6 +365,7 @@ JSON Output Schema:
         ],
         generationConfig: {
           responseMimeType: "application/json",
+          temperature: 0.1,
         },
       }),
     }
