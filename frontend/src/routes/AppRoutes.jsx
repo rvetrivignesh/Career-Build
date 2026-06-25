@@ -75,10 +75,6 @@ export const AppRoutes = () => {
             path="ai-coach"
             element={<AICoachPage />}
           />
-          <Route
-            path="settings"
-            element={<PlaceholderPage title="Settings" />}
-          />
         </Route>
 
         {/* Fallback Catch-All */}

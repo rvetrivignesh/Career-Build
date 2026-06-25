@@ -10,7 +10,6 @@ import {
   FileText,
   Compass,
   GraduationCap,
-  Settings,
   Sun,
   Moon,
   LogOut,
@@ -40,7 +39,6 @@ export const DashboardLayout = () => {
     { label: "Resume Analyzer", path: "/dashboard/resume-analyzer", icon: <Sparkles size={18} /> },
     { label: "Career Roadmaps", path: "/dashboard/career-roadmaps", icon: <Compass size={18} /> },
     { label: "AI Coach", path: "/dashboard/ai-coach", icon: <GraduationCap size={18} /> },
-    { label: "Settings", path: "/dashboard/settings", icon: <Settings size={18} /> },
   ];
 
   return (
