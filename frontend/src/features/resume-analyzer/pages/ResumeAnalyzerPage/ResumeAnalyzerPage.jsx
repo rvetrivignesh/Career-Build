@@ -42,10 +42,17 @@ export const ResumeAnalyzerPage = () => {
             Analyze your resume against targeted roles, identifying missing skills, keywords, and improvement metrics.
           </p>
         </div>
-        <button type="button" className={styles.historyToggleBtn} onClick={toggleHistory}>
-          <History size={18} />
-          <span>{isHistoryOpen ? "Hide History" : "History"}</span>
-        </button>
+        <div className={styles.headerActions}>
+          {activeAnalysis && (
+            <Button onClick={resetAnalyzer} variant="primary">
+              Analyze Another Resume
+            </Button>
+          )}
+          <button type="button" className={styles.historyToggleBtn} onClick={toggleHistory}>
+            <History size={18} />
+            <span>{isHistoryOpen ? "Hide History" : "History"}</span>
+          </button>
+        </div>
       </header>
 
       {/* Main Grid Workspace */}
@@ -114,7 +121,7 @@ export const ResumeAnalyzerPage = () => {
           ) : step === "results" && activeAnalysis ? (
             /* Set score variables dynamically on the container so conic-gradients paint perfectly */
             <div style={{ "--value": activeAnalysis.overallScore || activeAnalysis.atsScore }}>
-              <AnalysisResults analysis={activeAnalysis} onReset={resetAnalyzer} />
+              <AnalysisResults analysis={activeAnalysis} />
             </div>
           ) : (
             <UploadSection onAnalyze={runAnalysis} loading={loading} />

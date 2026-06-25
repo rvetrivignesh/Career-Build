@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import styles from "./AnalysisResults.module.css";
 
-export const AnalysisResults = ({ analysis, onReset }) => {
+export const AnalysisResults = ({ analysis }) => {
   const [activeDetailsTab, setActiveDetailsTab] = useState("experience");
 
   if (!analysis) return null;
@@ -360,12 +360,6 @@ export const AnalysisResults = ({ analysis, onReset }) => {
             )}
           </ul>
         </div>
-      </div>
-
-      <div style={{ marginTop: "16px", display: "flex", justifyContent: "flex-start" }}>
-        <Button onClick={onReset} variant="secondary">
-          Analyze Another Resume
-        </Button>
       </div>
     </div>
   );

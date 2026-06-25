@@ -23,6 +23,10 @@ export const useResumeAnalyzer = () => {
       setLoading(true);
       const data = await analyzerService.getAnalysisHistory(token);
       setHistory(data || []);
+      if (data && data.length > 0) {
+        setActiveAnalysis(data[0]);
+        setStep("results");
+      }
     } catch (err) {
       console.error(err);
       setError(err.message || "Failed to load history");
@@ -101,10 +105,18 @@ export const useResumeAnalyzer = () => {
     try {
       setLoading(true);
       await analyzerService.deleteAnalysis(analysisId, token);
-      setHistory((prev) => prev.filter((item) => item._id !== analysisId));
+      
+      const remaining = history.filter((item) => item._id !== analysisId);
+      setHistory(remaining);
+
       if (activeAnalysis?._id === analysisId) {
-        setActiveAnalysis(null);
-        setStep("upload");
+        if (remaining.length > 0) {
+          setActiveAnalysis(remaining[0]);
+          setStep("results");
+        } else {
+          setActiveAnalysis(null);
+          setStep("upload");
+        }
       }
       showToast("Analysis deleted from history", "success");
     } catch (err) {
