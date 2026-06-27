@@ -76,8 +76,14 @@ export const useResumeAnalyzer = () => {
     } catch (err) {
       if (stepInterval) clearInterval(stepInterval);
       console.error(err);
-      setError(err.message || "Failed to analyze resume");
-      setStep("upload");
+      if (history && history.length > 0) {
+        setActiveAnalysis(history[0]);
+        setStep("results");
+        setError(null);
+      } else {
+        setError(err.message || "Failed to analyze resume");
+        setStep("upload");
+      }
       showToast(err.message || "Analysis failed", "error");
     } finally {
       setLoading(false);
