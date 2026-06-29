@@ -65,7 +65,7 @@ export const generateQuiz = async (userId, targetRole, skill, level, isRetake = 
     .lean();
 
   const previousQuestionsList = previousQuizzes.flatMap((q) =>
-    q.questions.map((quest) => quest.question)
+    q.questions ? q.questions.map((quest) => quest.question) : []
   );
 
   const nextVersion = previousQuizzes.length + 1;
@@ -83,16 +83,31 @@ export const generateQuiz = async (userId, targetRole, skill, level, isRetake = 
     3: "Advanced Concepts / Architectural, troubleshooting, and optimization scenarios",
   };
 
-  const exclusionPrompt =
-    previousQuestionsList.length > 0
-      ? `\nCRITICAL: Do NOT reuse, repeat, or rephrase any of the following questions that were previously generated for this user:\n${JSON.stringify(
-          previousQuestionsList,
-          null,
-          2
-        )}`
-      : "";
+  let attempts = 0;
+  const maxAttempts = 3;
+  let lastError = null;
 
-  const prompt = `
+  while (attempts < maxAttempts) {
+    attempts++;
+    try {
+      // On later attempts, reduce or clear the exclusion list to avoid over-constraining the model
+      const excludedQuestions =
+        attempts === 1
+          ? previousQuestionsList.slice(-10) // Limit to last 10 questions to avoid overloading the model
+          : attempts === 2
+          ? previousQuestionsList.slice(-5) // Even more lenient on second attempt
+          : []; // No exclusion on third attempt to guarantee success
+
+      const exclusionPrompt =
+        excludedQuestions.length > 0
+          ? `\nCRITICAL: Do NOT reuse, repeat, or rephrase any of the following questions that were previously generated for this user:\n${JSON.stringify(
+              excludedQuestions,
+              null,
+              2
+            )}`
+          : "";
+
+      const prompt = `
 You are an expert technical interviewer and recruiter specializing in job readiness assessments.
 Generate exactly 10 Multiple Choice Questions (MCQs) for the skill "${correctSkillName}" in the target role "${cleanRole}".
 
@@ -127,72 +142,78 @@ Expected Output JSON Schema:
 }
 `;
 
-  try {
-    const response = await fetch(
-      "https://api.groq.com/openai/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          model: "llama-3.1-8b-instant",
-          messages: [
-            {
-              role: "user",
-              content: prompt,
-            },
-          ],
-          response_format: {
-            type: "json_object",
+      const response = await fetch(
+        "https://api.groq.com/openai/v1/chat/completions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${apiKey}`,
           },
-          temperature: 0.2,
-          max_tokens: 4096,
-        }),
+          body: JSON.stringify({
+            model: "llama-3.1-8b-instant",
+            messages: [
+              {
+                role: "user",
+                content: prompt,
+              },
+            ],
+            response_format: {
+              type: "json_object",
+            },
+            temperature: 0.2,
+            max_tokens: 4096,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Groq API error: ${response.status} - ${errorText}`);
       }
-    );
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Groq API error: ${response.status} - ${errorText}`);
+      const result = await response.json();
+      if (
+        !result.choices ||
+        result.choices.length === 0 ||
+        !result.choices[0].message ||
+        !result.choices[0].message.content
+      ) {
+        throw new Error("Invalid or empty response from Groq API");
+      }
+
+      let jsonText = result.choices[0].message.content.trim();
+
+      // Strip markdown formatting if returned
+      if (jsonText.startsWith("```")) {
+        jsonText = jsonText.replace(/^```json\s*/i, "").replace(/```$/, "").trim();
+      }
+
+      const parsedData = JSON.parse(jsonText);
+      const validatedData = validateQuizJSON(parsedData);
+
+      const quiz = new Quiz({
+        user: userId,
+        targetRole: cleanRole,
+        skill: correctSkillName,
+        level,
+        questions: validatedData.questions,
+        questionVersion: nextVersion,
+      });
+
+      await quiz.save();
+      return quiz.toObject();
+    } catch (error) {
+      console.warn(`Quiz generation attempt ${attempts} failed:`, error.message);
+      lastError = error;
+      if (attempts < maxAttempts) {
+        // Add a 500ms delay before retrying
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
     }
-
-    const result = await response.json();
-    if (
-      !result.choices ||
-      result.choices.length === 0 ||
-      !result.choices[0].message ||
-      !result.choices[0].message.content
-    ) {
-      throw new Error("Invalid or empty response from Groq API");
-    }
-
-    let jsonText = result.choices[0].message.content.trim();
-
-    // Strip markdown formatting if returned
-    if (jsonText.startsWith("```")) {
-      jsonText = jsonText.replace(/^```json\s*/i, "").replace(/```$/, "").trim();
-    }
-
-    const parsedData = JSON.parse(jsonText);
-    const validatedData = validateQuizJSON(parsedData);
-
-    const quiz = new Quiz({
-      user: userId,
-      targetRole: cleanRole,
-      skill: correctSkillName,
-      level,
-      questions: validatedData.questions,
-      questionVersion: nextVersion,
-    });
-
-    await quiz.save();
-    return quiz.toObject();
-  } catch (error) {
-    console.error("Quiz generation error:", error);
-    throw new Error(`Failed to generate quiz: ${error.message}`);
   }
+
+  throw new Error(`Failed to generate quiz after ${maxAttempts} attempts: ${lastError.message}`);
 };
 
 /**
